@@ -3,10 +3,17 @@ import json
 import urllib3
 import os
 import time
+import datetime
 urllib3.disable_warnings()
 
+print("사각형 모양으로 백신범위를 지정한 뒤, 해당 범위 안에 있는 백신을 조회해서 남은 백신이 있으면 Chrome 브라우저를 엽니다.")
+topx = input("사각형의 위쪽 좌측 x값을 넣어주세요 : ")
+topy = input("사각형의 위쪽 좌측 y값을 넣어주세요 : ")
+botx = input("사각형의 아래쪽 우측 x값을 넣어주세요 : ")
+boty = input("사각형의 아래쪽 우측 y값을 넣어주세요 : ")
 APIURL = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
-APIdata = '{"bottomRight":{"x":127.40752397814762,"y":36.35252722021185},"onlyLeft":false,"order":"latitude","topLeft":{"x":127.482570304122,"y":36.317732943866424}}'
+APIdata = '{"bottomRight":{"x":' + botx + ',"y":' + boty + '},"onlyLeft":false,"order":"latitude","topLeft":{"x":' + topx + ',"y":' + topy + '}}'
+print(APIdata)
 headers = {
     "Host": "vaccine-map.kakao.com",
     "Connection": "keep-alive",
@@ -29,6 +36,7 @@ while done == False:
     received_API_data = response.text
 
     print(received_API_data)
+    print(datetime.datetime.now())
 
     jsonloaded = json.loads(received_API_data)
     jsonData = jsonloaded["organizations"]
