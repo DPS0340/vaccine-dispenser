@@ -44,12 +44,9 @@ while done == False:
         # print(values)
 
 
-# TODO : "status":"AVALIABLE" 또는 "leftCounts":0이 아닌 것을 찾아서 해당되는 병원의 orgCode를 가져오기
 print("--- found")
 print("name: " + found.get('orgName'))
 print("leftCounts: " + found.get('leftCounts'))
-# 가져온 orgCode를 아래 os.system에 orgCdCode 변수로 지정해서 크롬 열기
 orgCdCode = x.get('orgCode')
-# "status":"AVALIABLE" 또는 "leftCounts":0이 아닌 것의 병원코드를 한번 가져온 후에 크롬을 열고 이 프로세스 멈추기
 
 os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://v-search.nid.naver.com/reservation/standby?orgCd=' + orgCdCode + '"')
