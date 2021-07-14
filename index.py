@@ -57,6 +57,6 @@ while done == False:
 print("--- found")
 print("name: " + found.get('orgName'))
 print("leftCounts: " + found.get('leftCounts'))
-orgCdCode = x.get('orgCode')
+orgCdCode = str(x.get('orgCode'))
 
 os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://v-search.nid.naver.com/reservation/standby?orgCd=' + orgCdCode + '"')
