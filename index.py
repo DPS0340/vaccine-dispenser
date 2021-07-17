@@ -59,4 +59,6 @@ print("name: " + found.get('orgName'))
 print("leftCounts: " + found.get('leftCounts'))
 orgCdCode = str(x.get('orgCode'))
 
-os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://v-search.nid.naver.com/reservation/standby?orgCd=' + orgCdCode + '"')
+os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode + '?from=https%3A%2F%2Fvaccine.kakao.com%2Fdetail%2F' + orgCdCode + '&code=VEN00013"')
+# VEN00013 = 화이자
+# VEN00014 = 모더나
