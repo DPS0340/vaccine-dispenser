@@ -55,10 +55,13 @@ while done == False:
 
 
 print("--- found")
-print("name: " + found.get('orgName'))
-print("leftCounts: " + found.get('leftCounts'))
+print(found)
 orgCdCode = str(x.get('orgCode'))
+latkey = str(x.get('y'))
+lngkey = str(x.get('x'))
 
-os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode + '?from=https%3A%2F%2Fvaccine.kakao.com%2Fdetail%2F' + orgCdCode + '&code=VEN00013"')
+os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode
+ + '?from=https%3A%2F%2Fvaccine.kakao.com%2Fdetail%2F' + orgCdCode + '%3Flat%3D' + latkey + '%26lng%3D' + lngkey
+ + '&code=VEN00013"')
 # VEN00013 = 화이자
 # VEN00014 = 모더나
