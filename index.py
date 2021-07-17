@@ -62,5 +62,6 @@ lngkey = str(x.get('x'))
 
 os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode
  + '?from=https%3A%2F%2Fvaccine.kakao.com%2Fdetail%2F' + orgCdCode + '%3Flat%3D' + latkey + '%26lng%3D' + lngkey + '%26from%3DMap&closable=false'
- + '&code=VEN00013"')# VEN00013 = 화이자
+ + '&code=VEN00013"')
+# VEN00013 = 화이자
 # VEN00014 = 모더나
