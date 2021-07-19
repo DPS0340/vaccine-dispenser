@@ -31,7 +31,7 @@ headers = {
 
 done = False
 while done == False:
-    time.sleep(1)
+    time.sleep(0.26)
     response = requests.post(APIURL, data=APIdata, headers=headers, verify=False)
 
     received_API_status_code = response.status_code
@@ -60,8 +60,9 @@ orgCdCode = str(x.get('orgCode'))
 latkey = str(x.get('y'))
 lngkey = str(x.get('x'))
 
+time.sleep(0.13)
 os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode
- + '?from=https%3A%2F%2Fvaccine.kakao.com%2Fdetail%2F' + orgCdCode + '%3Flat%3D' + latkey + '%26lng%3D' + lngkey + '%26from%3DMap&closable=false'
+ + '?from=https%3A%2F%2Fvaccine.kakao.com%2Fdetail%2F' + orgCdCode + '%3Flat%3D' + latkey + '%26lng%3D' + lngkey + '%26from%3DMap%26closable=false'
  + '&code=VEN00013"')
 # VEN00013 = 화이자
 # VEN00014 = 모더나
