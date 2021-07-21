@@ -1,1 +1,1 @@
-# open-naver-vaccine-web-macro
+# korea-covid-19-remaining-vaccine-macro
