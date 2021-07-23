@@ -28,7 +28,6 @@ def vaccine_codes():
 
 def pretty_print(json_string):
     json_object = json.loads(json_string)
-    os.system('clear')
     for org in json_object["organizations"]:
         if org.get('status') == "CLOSED" or org.get('status') == "EXHAUSTED":
             continue
