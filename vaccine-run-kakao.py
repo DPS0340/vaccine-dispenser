@@ -35,20 +35,11 @@ if os.path.exists('config.ini'):
         prevtopy = configuration["topY"]
         prevbotx = configuration["botX"]
         prevboty = configuration["botY"]
+        
+        skip_input = str.lower(input("기존에 입력한 정보로 재검색하시겠습니까? Y/N : "))
+        
     except ValueError:
         pass
-
-print("예약시도할 백신 코드를 알려주세요. 예시: VEN00013 ")
-print("화이자         : VEN00013")
-print("모더나         : VEN00014")
-print("아스크라제네카   : VEN00015")
-print("얀센          : VEN00016")
-
-VAC = None
-while VAC == None:
-    VAC = input(f"예약시도할 백신 코드를 알려주세요.(최근 사용 : {prevVAC}): ")
-    if not VAC.strip():
-        VAC = prevVAC
 
 def pretty_print(json_string):
     json_object = json.loads(json_string)
@@ -58,28 +49,47 @@ def pretty_print(json_string):
         print(f"잔여갯수: {org.get('leftCounts')}\t상태: {org.get('status')}\t기관명: {org.get('orgName')}\t주소: {org.get('address')}")
 
 # ===================================== def ===================================== #
-print("사각형 모양으로 백신범위를 지정한 뒤, 해당 범위 안에 있는 백신을 조회해서 남은 백신이 있으면 Chrome 브라우저를 엽니다.")
-topx = None
-while topx == None:
-    topx = input(f"사각형의 위쪽 좌측 x값을 넣어주세요. 127.xxxxxx(최근 사용 : {prevtopx}): ")
-    if not topx.strip():
-        topx = prevtopx
-topy = None
-while topy == None:
-    topy = input(f"사각형의 위쪽 좌측 y값을 넣어주세요 37.xxxxx(최근 사용 : {prevtopy}): ")
-    if not topy.strip():
-        topy = prevtopy
-botx = None
-while botx == None:
-    botx = input(f"사각형의 아래쪽 우측 x값을 넣어주세요 127.xxxxx(최근 사용 : {prevbotx}): ")
-    if not botx.strip():
-        botx = prevbotx
-boty = None
-while boty == None:
-    boty = input(f"사각형의 아래쪽 우측 y값을 넣어주세요 37.xxxxx(최근 사용 : {prevboty}): ")
-    if not boty.strip():
-        boty = prevboty
+if skip_input != "y":
+    VAC = None
+    while VAC == None:
+        print("예약시도할 백신 코드를 알려주세요.")
+        print("화이자         : VEN00013")
+        print("모더나         : VEN00014")
+        print("아스크라제네카   : VEN00015")
+        print("얀센          : VEN00016")
+        VAC = input(f"예약시도할 백신 코드를 알려주세요.(최근 사용 : {prevVAC}): ")
+        if not VAC.strip():
+            VAC = prevVAC
+            
+    print("사각형 모양으로 백신범위를 지정한 뒤, 해당 범위 안에 있는 백신을 조회해서 남은 백신이 있으면 Chrome 브라우저를 엽니다.")
+    topx = None
+    while topx == None:
+        topx = input(f"사각형의 위쪽 좌측 x값을 넣어주세요. 127.xxxxxx(최근 사용 : {prevtopx}): ")
+        if not topx.strip():
+            topx = prevtopx
+    topy = None
+    while topy == None:
+        topy = input(f"사각형의 위쪽 좌측 y값을 넣어주세요 37.xxxxx(최근 사용 : {prevtopy}): ")
+        if not topy.strip():
+            topy = prevtopy
+    botx = None
+    while botx == None:
+        botx = input(f"사각형의 아래쪽 우측 x값을 넣어주세요 127.xxxxx(최근 사용 : {prevbotx}): ")
+        if not botx.strip():
+            botx = prevbotx
+    boty = None
+    while boty == None:
+        boty = input(f"사각형의 아래쪽 우측 y값을 넣어주세요 37.xxxxx(최근 사용 : {prevboty}): ")
+        if not boty.strip():
+            boty = prevboty
+else:
+    VAC = prevVAC
+    topx = prevtopx
+    topy = prevtopy
+    botx = prevbotx
+    boty = prevboty
 
+    
 APIURL = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
 APIdata = {"bottomRight":{"x":botx ,"y":boty},"onlyLeft": False,"order":"latitude","topLeft":{"x":topx,"y":topy}}
 config_parser['config'] = {}
