@@ -36,7 +36,6 @@ def pretty_print(json_string):
               + "\t주소: " + org.get("address"))
 
 # ===================================== def ===================================== #
-vaccine_codes()
 print("사각형 모양으로 백신범위를 지정한 뒤, 해당 범위 안에 있는 백신을 조회해서 남은 백신이 있으면 Chrome 브라우저를 엽니다.")
 topx = str(input("사각형의 위쪽 좌측 x값을 넣어주세요. 127.xxxxxx   : "))
 topy = str(input("사각형의 위쪽 좌측 y값을 넣어주세요 37.xxxxx      : "))
