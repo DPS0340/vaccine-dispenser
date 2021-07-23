@@ -143,3 +143,5 @@ elif platform == "darwin":
     os.system(f'/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
 elif platform == "win32":
     os.system(f'start chrome.exe "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
+
+input("Press Enter to continue...")
