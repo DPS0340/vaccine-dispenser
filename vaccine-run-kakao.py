@@ -17,14 +17,13 @@ import datetime
 from sys import platform
 urllib3.disable_warnings()
 
-def vaccine_codes():
-    print("예약시도할 백신 코드를 알려주세요. 예시: VEN00013 ")
-    print("화이자         : VEN00013")
-    print("모더나         : VEN00014")
-    print("아스크라제네카   : VEN00015")
-    print("얀센          : VEN00016")
-    VAC = str(input("예약시도할 백신 코드를 알려주세요. : "))
-    return VAC
+
+print("예약시도할 백신 코드를 알려주세요. 예시: VEN00013 ")
+print("화이자         : VEN00013")
+print("모더나         : VEN00014")
+print("아스크라제네카   : VEN00015")
+print("얀센          : VEN00016")
+VAC = str(input("예약시도할 백신 코드를 알려주세요. : "))
 
 def pretty_print(json_string):
     json_object = json.loads(json_string)
