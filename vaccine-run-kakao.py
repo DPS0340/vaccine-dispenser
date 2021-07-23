@@ -47,10 +47,10 @@ print(APIdata)
 headers = {
     "Accept": "application/json, text/plain, */*",
     "Content-Type": "application/json;charset=utf-8",
-    "Origin": "https://vaccine.kakao.com",
+    "Origin": "https://vaccine-map.kakao.com",
     "Accept-Language": "en-us",
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
-    "Referer":"https://vaccine.kakao.com/reservation/{a['orgCode']}?from=Map&code=VEN00013",
+    "Referer":"https://vaccine-map.kakao.com/",
     "Accept-Encoding": "gzip, deflate",
     "Connection": "close"
 }
