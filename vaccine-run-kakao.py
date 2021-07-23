@@ -1,5 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+
+search_time = 0.26    # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
+open_delay = 0        # 잔여백신 발생 시 브라우저를 열기 전 지연시간. 단위: 초
+
+
+
+
 import requests
 import json
 import urllib3
@@ -7,6 +15,20 @@ import os
 import time
 import datetime
 urllib3.disable_warnings()
+
+def vaccine_codes():
+    print("예약시도할 백신 코드를 알려주세요. 예시: VEN00013 ")
+    print("화이자         : VEN00013")
+    print("모더나         : VEN00014")
+    print("아스크라제네카   : VEN00015")
+    print("얀센          : VEN00016")
+    VAC = str(input("예약시도할 백신 코드를 알려주세요. : "))
+
+        
+    return VAC
+
+# ===================================== def ===================================== #
+vaccine_codes()
 
 print("사각형 모양으로 백신범위를 지정한 뒤, 해당 범위 안에 있는 백신을 조회해서 남은 백신이 있으면 Chrome 브라우저를 엽니다.")
 topx = str(input("사각형의 위쪽 좌측 x값을 넣어주세요. 127.xxxxxx   : "))
@@ -31,7 +53,7 @@ headers = {
 
 done = False
 while done == False:
-    time.sleep(0.26)
+    time.sleep(search_time)
     response = requests.post(APIURL, data=APIdata, headers=headers, verify=False)
 
     received_API_status_code = response.status_code
@@ -60,9 +82,6 @@ orgCdCode = str(x.get('orgCode'))
 latkey = str(x.get('y'))
 lngkey = str(x.get('x'))
 
+time.sleep(open_delay)
 os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode
- + '?from=Map&code=VEN00013"')
-# VEN00013 = 화이자
-# VEN00014 = 모더나
-# VEN00015 = AZ
-# VEN00016 = 얀센
+ + '?from=Map&code=' + VAC + '"')
