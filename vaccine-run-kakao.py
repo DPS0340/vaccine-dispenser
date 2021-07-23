@@ -18,6 +18,7 @@ import configparser
 from sys import platform
 urllib3.disable_warnings()
 
+skip_input = "n"
 config_parser = configparser.ConfigParser()
 prevVAC = None
 prevtopx = None
