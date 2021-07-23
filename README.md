@@ -3,7 +3,7 @@
 
 ## 카카오 잔여백신 예약
 ### 이용방법
-1. https://accounts.kakao.com/login 에 접근하여 카카오 로그인을 합니다.
+1. [https://accounts.kakao.com/login](https://accounts.kakao.com/login?continue=https%3A%2F%2Faccounts.kakao.com%2Fweblogin%2Faccount%2Finfo) 에 접근하여 카카오 로그인을 합니다.
 2. https://vaccine.kakao.com/api/v1/user 에 접근하여 본인의 정보가 정상적으로 표시되는지 확인합니다.  
 정상적으로 표시되지 않는 경우 카카오톡에서 잔여백신 알림 신청을 해줍니다.
 3. https://vaccine-map.kakao.com/map2?v=1 에서 지도를 움직여서 잔여백신을 검색할 지역을 설정하고, 개발자도구를 열어 해당 위치의 x, y값을 기록해둡니다.
