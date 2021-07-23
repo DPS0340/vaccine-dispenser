@@ -14,6 +14,7 @@ import urllib3
 import os
 import time
 import datetime
+from sys import platform
 urllib3.disable_warnings()
 
 def vaccine_codes():
@@ -83,5 +84,9 @@ latkey = str(x.get('y'))
 lngkey = str(x.get('x'))
 
 time.sleep(open_delay)
-os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode
- + '?from=Map&code=' + VAC + '"')
+if platform == "linux" or platform == "linux2":
+    os.system('/usr/bin/google-chrome "https://vaccine.kakao.com/reservation/' + orgCdCode + '?from=Map&code=' + VAC + '"')
+elif platform == "darwin":
+    os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/' + orgCdCode + '?from=Map&code=' + VAC + '"')
+elif platform == "win32":
+    os.system('start chrome.exe "https://vaccine.kakao.com/reservation/' + orgCdCode + '?from=Map&code=' + VAC + '"')
