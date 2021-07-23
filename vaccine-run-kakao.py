@@ -45,16 +45,14 @@ APIURL = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
 APIdata = '{"bottomRight":{"x":' + botx + ',"y":' + boty + '},"onlyLeft":false,"order":"latitude","topLeft":{"x":' + topx + ',"y":' + topy + '}}'
 print(APIdata)
 headers = {
-    "Host": "vaccine-map.kakao.com",
-    "Connection": "keep-alive",
-    "Origin": "https://vaccine-map.kakao.com",
-    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.52 Safari/536.5",
-    "Content-Type": "application/json",
-    "Accept": "*/*",
-    "Referer": "https://vaccine-map.kakao.com/",
-    "Accept-Encoding": "gzip,deflate,sdch",
-    "Accept-Language": "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4",
-    "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.3"
+    "Accept": "application/json, text/plain, */*",
+    "Content-Type": "application/json;charset=utf-8",
+    "Origin": "https://vaccine.kakao.com",
+    "Accept-Language": "en-us",
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
+    "Referer":"https://vaccine.kakao.com/reservation/{a['orgCode']}?from=Map&code=VEN00013",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "close"
 }
 
 done = False
