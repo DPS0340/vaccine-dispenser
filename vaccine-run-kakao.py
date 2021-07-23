@@ -24,9 +24,18 @@ def vaccine_codes():
     print("아스크라제네카   : VEN00015")
     print("얀센          : VEN00016")
     VAC = str(input("예약시도할 백신 코드를 알려주세요. : "))
-
-        
     return VAC
+
+def pretty_print(json_string):
+    json_object = json.loads(json_string)
+    os.system('clear')
+    for org in json_object["organizations"]:
+        if org.get('status') == "CLOSED" or org.get('status') == "EXHAUSTED":
+            continue
+        print("잔여갯수: " + str(org.get('leftCounts'))
+              + "\t상태: " + org.get('status')
+              + "\t기관명: " + org.get("orgName")
+              + "\t주소: " + org.get("address"))
 
 # ===================================== def ===================================== #
 vaccine_codes()
@@ -60,7 +69,7 @@ while done == False:
     received_API_status_code = response.status_code
     received_API_data = response.text
 
-    print(received_API_data)
+    pretty_print(received_API_data)
     print(datetime.datetime.now())
 
     jsonloaded = json.loads(received_API_data)
