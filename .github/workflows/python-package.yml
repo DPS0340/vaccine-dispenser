@@ -34,7 +34,7 @@ jobs:
       run: |
         pyinstaller --onefile vaccine-run-kakao.py
     - name: Zip Files
-    - uses: papeloto/action-zip@v1
+      uses: papeloto/action-zip@v1
       with:
           files: dist/ tada.mp3
           dest: vaccine-run-kakao-windows.zip
