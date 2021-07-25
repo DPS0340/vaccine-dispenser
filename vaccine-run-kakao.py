@@ -181,7 +181,7 @@ if skip_input == False:
         print("아스크라제네카   : VEN00015")
         print("얀센          : VEN00016")
         print("아무거나       : ANY")
-        VAC = input(f"예약시도할 백신 코드를 알려주세요. (최근 사용 : {prevVAC}): ")
+        VAC = str.upper(input(f"예약시도할 백신 코드를 알려주세요. (최근 사용 : {prevVAC}): "))
         if not VAC.strip():
             VAC = prevVAC
             
