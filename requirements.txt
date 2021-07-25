@@ -1,4 +1,10 @@
 requests
+requests
 urllib3
+os
+time
+datetime
+configparser
+sys
 browser_cookie3
 pygame
