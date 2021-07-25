@@ -92,7 +92,7 @@ else:
     boty = prevboty
 
     
-APIURL = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
+APIURL = 'http://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
 APIdata = {"bottomRight":{"x":botx ,"y":boty},"onlyLeft": False,"order":"latitude","topLeft":{"x":topx,"y":topy}}
 config_parser['config'] = {}
 conf = config_parser['config']
