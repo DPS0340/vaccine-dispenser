@@ -284,7 +284,6 @@ def find_vaccine():
                 break
             else:
                 print("검색 도중 백신이 모두 소진되었거나 선택한 백신이 재고가 없습니다.")
-                find_vaccine()
         else: # 아무 백신
             if x.get('leftCount') != 0:
                 found = x
@@ -293,10 +292,12 @@ def find_vaccine():
                 break
             else:
                 print("검색 도중 백신이 모두 소진되었습니다.")
-                find_vaccine()
 
+    
     if VAC_found_code != '':
         try_reservation(orgCdCode, VAC_found_code)
+    else:
+        find_vaccine()
 
 
 # ===================================== run ===================================== #
