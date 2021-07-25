@@ -33,6 +33,7 @@ jobs:
     - name: Make OneFile
       run: |
         pyinstaller --onefile vaccine-run-kakao.py
+        chmod +x dist/vaccine-run-kakao
     - name: Zip Files
       uses: papeloto/action-zip@v1
       with:
