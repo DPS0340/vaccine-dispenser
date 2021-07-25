@@ -3,7 +3,7 @@
 
 ## 카카오 잔여백신 예약
 ### 이용방법
-1. Chrome 브라우저를 이용하여 모든 작업을 진행하므로, 크롬 브라우저를 실행해주세요.
+1. Chrome 브라우저를 이용하여 모든 작업을 진행하므로, 크롬 브라우저를 실행해주세요. [로그인 시 주의사항](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/issues/82)
 2. [https://accounts.kakao.com/login](https://accounts.kakao.com/login?continue=https%3A%2F%2Faccounts.kakao.com%2Fweblogin%2Faccount%2Finfo) 에 접근하여 카카오 로그인을 합니다.
 3. [#2](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/2)를 보고 잔여백신을 검색할 범위의 좌표값을 찾습니다.
 4. Release 페이지에서 `vaccine-run-kakao-windows.zip`을 받아 압축해제하고, exe 파일을 실행합니다.
