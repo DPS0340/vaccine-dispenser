@@ -116,7 +116,7 @@ def try_reservation(orgCdCode, vacc_code):
                 continue
             if key == 'code' and value == "NO_VACANCY":
                 print("잔여백신 접종 신청이 선착순 마감되었습니다.")
-                time.sleep(0.1)
+                time.sleep(0.08)
             elif key == 'code' and value == "SUCCESS":
                 print("백신접종신청 성공!!!")
                 Success_Org = Reservation_Response_jsonloaded["organization"]
@@ -270,21 +270,15 @@ def find_vaccine():
     # 실제 백신 남은수량 확인
     VAC_found_code = ''
 
-    Check_Org_URL = 'https://vaccine.kakao.com/api/v2/org/org_code/'+ orgCdCode
-    Check_Org_response = requests.get(Check_Org_URL, headers=headers.headers_vacc, cookies=jar, verify=False)
-    # print(Check_Org_response.text)
-    Check_Org_jsonloaded = json.loads(Check_Org_response.text)
-    Check_Org_jsonData = Check_Org_jsonloaded["lefts"]
-    for x in Check_Org_jsonData:
-        if VAC != "ANY": # 특정 백신 선택
-            if x.get('vaccineCode') == VAC and x.get('leftCount') != 0:
-                found = x
-                print(found)
-                VAC_found_code = x.get('vaccineCode')
-                break
-            else:
-                print("검색 도중 백신이 모두 소진되었거나 선택한 백신이 재고가 없습니다.")
-        else: # 아무 백신
+    if VAC != "ANY": # 특정 백신 선택
+        VAC_found_code = VAC
+    else: # ANY 백신 선택
+        Check_Org_URL = 'https://vaccine.kakao.com/api/v2/org/org_code/'+ orgCdCode
+        Check_Org_response = requests.get(Check_Org_URL, headers=headers.headers_vacc, cookies=jar, verify=False)
+        # print(Check_Org_response.text)
+        Check_Org_jsonloaded = json.loads(Check_Org_response.text)
+        Check_Org_jsonData = Check_Org_jsonloaded["lefts"]
+        for x in Check_Org_jsonData:
             if x.get('leftCount') != 0:
                 found = x
                 print(found)
@@ -292,8 +286,8 @@ def find_vaccine():
                 break
             else:
                 print("검색 도중 백신이 모두 소진되었습니다.")
-
     
+
     if VAC_found_code != '':
         try_reservation(orgCdCode, VAC_found_code)
     else:
