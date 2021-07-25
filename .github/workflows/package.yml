@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  Windows-Build:
 
     runs-on: windows-latest
     strategy:
@@ -45,7 +45,7 @@ jobs:
           path: vaccine-run-kakao-windows.zip
 
 
-  build:
+  MacOS-Build:
 
     runs-on: macos-latest
     strategy:
