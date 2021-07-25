@@ -201,6 +201,7 @@ UserInfoJsonLoaded = json.loads(UserInfo_response.text)
 if UserInfoJsonLoaded.get('error'):
     print("사용자 정보를 불러오는데 실패하였습니다.")
     print("Chrome 브라우저에서 카카오에 제대로 로그인되어있는지 확인해주세요.")
+    print("로그인이 되어 있는데도 안된다면, 카카오톡에 들어가서 잔여백신 알림 신청을 한번 해보세요. 정보제공 동의가 나온다면 동의 후 다시 시도해주세요.")
     close()
 else:
     UserInfojsonData = UserInfoJsonLoaded.get("user")
