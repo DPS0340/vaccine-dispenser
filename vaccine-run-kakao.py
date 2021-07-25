@@ -118,7 +118,7 @@ def try_reservation(orgCdCode, vacc_code):
                 time.sleep(0.1)
             elif key == 'code' and value == "SUCCESS":
                 print("백신접종신청 성공!!!")
-                Success_Org = Reservation_Response.text["organizations"]
+                Success_Org = Reservation_Response_jsonloaded["organization"]
                 print(f"병원이름: {Success_Org.get('orgName')}\t전화번호: {Success_Org.get('phoneNumber')}\t주소: {Success_Org.get('address')}\t운영시간: {Success_Org.get('openHour')}")
                 play_sound()
                 close()
