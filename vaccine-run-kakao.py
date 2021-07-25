@@ -19,7 +19,12 @@ from sys import platform
 urllib3.disable_warnings()
 requests.adapters.DEFAULT_RETRIES = 5
 
-skip_input = "n"
+
+def close():
+    input("Press Enter to close...")
+    exit()
+
+
 config_parser = configparser.ConfigParser()
 prevVAC = None
 prevtopx = None
@@ -39,9 +44,27 @@ if os.path.exists('config.ini'):
         prevboty = configuration["botY"]
         
         skip_input = str.lower(input("기존에 입력한 정보로 재검색하시겠습니까? Y/N : "))
+        if skip_input == "y":
+            skip_input = True
+        elif skip_input == "n":
+            skip_input = False
+        else:
+            print("Y 또는 N을 입력해 주세요.")
+            close()
         
     except ValueError:
         pass
+
+
+always_repeat = str.lower(input("잔여백신이 발생해도 프로그램을 멈추지 않으시겠습니까? Y/N : "))
+if always_repeat == "y":
+    always_repeat = True
+elif always_repeat == "n":
+    always_repeat = False
+else:
+    print("Y 또는 N을 입력해 주세요.")
+    close()
+
 
 def pretty_print(json_string):
     json_object = json.loads(json_string)
@@ -50,8 +73,9 @@ def pretty_print(json_string):
             continue
         print(f"잔여갯수: {org.get('leftCounts')}\t상태: {org.get('status')}\t기관명: {org.get('orgName')}\t주소: {org.get('address')}")
 
+
 # ===================================== def ===================================== #
-if skip_input != "y":
+if skip_input == False:
     VAC = None
     while VAC == None:
         print("예약시도할 백신 코드를 알려주세요.")
@@ -84,12 +108,15 @@ if skip_input != "y":
         boty = input(f"사각형의 아래쪽 우측 y값을 넣어주세요 37.xxxxx(최근 사용 : {prevboty}): ")
         if not boty.strip():
             boty = prevboty
-else:
+elif skip_input == True:
     VAC = prevVAC
     topx = prevtopx
     topy = prevtopy
     botx = prevbotx
     boty = prevboty
+else:
+    print("문제가 발생했습니다. 프로그램을 종료합니다.")
+    exit()
 
     
 APIURL = 'http://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
@@ -105,56 +132,65 @@ conf["botY"] = boty
 with open("config.ini", "w") as config_file:
     config_parser.write(config_file)
 
-print(APIdata)
-headers = {
-    "Accept": "application/json, text/plain, */*",
-    "Content-Type": "application/json;charset=utf-8",
-    "Origin": "https://vaccine-map.kakao.com",
-    "Accept-Language": "en-us",
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
-    "Referer":"https://vaccine-map.kakao.com/",
-    "Accept-Encoding": "gzip, deflate",
-    "Connection": "Keep-Alive",
-    "Keep-Alive": "timeout=5, max=1000"
-}
+def find_vaccine():
+    print(APIdata)
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json;charset=utf-8",
+        "Origin": "https://vaccine-map.kakao.com",
+        "Accept-Language": "en-us",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
+        "Referer":"https://vaccine-map.kakao.com/",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+    }
 
-done = False
-while done == False:
-    time.sleep(search_time)
-    response = requests.post(APIURL, data=json.dumps(APIdata), headers=headers, verify=False)
+    done = False
+    while done == False:
+        time.sleep(search_time)
+        response = requests.post(APIURL, data=json.dumps(APIdata), headers=headers, verify=False)
 
-    received_API_status_code = response.status_code
-    received_API_data = response.text
+        received_API_status_code = response.status_code
+        received_API_data = response.text
 
-    pretty_print(received_API_data)
-    print(datetime.datetime.now())
+        pretty_print(received_API_data)
+        print(datetime.datetime.now())
 
-    jsonloaded = json.loads(received_API_data)
-    jsonData = jsonloaded["organizations"]
-    found = False
-    for x in jsonData:
-        if x.get('status') == "AVAILABLE" or x.get('leftCounts') != 0:
-            found = x
-            done = True
-            break
-        # keys = x.keys()
-        # print(keys)
-        # values = x.values()
-        # print(values)
+        jsonloaded = json.loads(received_API_data)
+        jsonData = jsonloaded["organizations"]
+        found = False
+        for x in jsonData:
+            if x.get('status') == "AVAILABLE" or x.get('leftCounts') != 0:
+                found = x
+                done = True
+                break
+            # keys = x.keys()
+            # print(keys)
+            # values = x.values()
+            # print(values)
 
 
-print("--- found")
-print(found)
-orgCdCode = x.get('orgCode')
-latkey = x.get('y')
-lngkey = x.get('x')
+    print("--- found")
+    print(found)
+    orgCdCode = x.get('orgCode')
+    latkey = x.get('y')
+    lngkey = x.get('x')
 
-time.sleep(open_delay)
-if platform == "linux" or platform == "linux2":
-    os.system(f'/usr/bin/google-chrome "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
-elif platform == "darwin":
-    os.system(f'/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
-elif platform == "win32":
-    os.system(f'start chrome.exe "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
+    time.sleep(open_delay)
+    if platform == "linux" or platform == "linux2":
+        os.system(f'/usr/bin/google-chrome "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
+    elif platform == "darwin":
+        os.system(f'/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
+    elif platform == "win32":
+        os.system(f'start chrome.exe "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
 
-input("Press Enter to continue...")
+
+# ===================================== run ===================================== #
+
+find_vaccine()
+while always_repeat == True:
+    find_vaccine()
+
+
+close()
