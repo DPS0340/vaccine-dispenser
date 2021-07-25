@@ -145,6 +145,32 @@ def try_reservation(orgCdCode, vacc_code):
 #     print(cookie)
 
 
+UserInfoAPI = 'https://vaccine.kakao.com/api/v1/user'
+# print(jar)
+UserInfo_response = requests.get(UserInfoAPI, headers=headers.headers_vacc, cookies=jar, verify=False)
+# print(UserInfo_response.text)
+
+# {"error":"error occurred"}
+UserInfoJsonLoaded = json.loads(UserInfo_response.text)
+if UserInfoJsonLoaded.get('error'):
+    print("사용자 정보를 불러오는데 실패하였습니다.")
+    print("Chrome 브라우저에서 카카오에 제대로 로그인되어있는지 확인해주세요.")
+    print("로그인이 되어 있는데도 안된다면, 카카오톡에 들어가서 잔여백신 알림 신청을 한번 해보세요. 정보제공 동의가 나온다면 동의 후 다시 시도해주세요.")
+    close()
+else:
+    UserInfojsonData = UserInfoJsonLoaded.get("user")
+    for key in UserInfojsonData:
+        value = UserInfojsonData[key]
+        # print(key, value)
+        if key != 'status':
+            continue
+        if key == 'status' and value == "NORMAL":
+            print("사용자 정보를 불러오는데 성공했습니다.")
+            break
+        else:
+            print("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
+            close()
+
 
 if skip_input == False:
     VAC = None
@@ -190,33 +216,7 @@ else:
     print("문제가 발생했습니다. 프로그램을 종료합니다.")
     close()
 
-    
 
-UserInfoAPI = 'https://vaccine.kakao.com/api/v1/user'
-# print(jar)
-UserInfo_response = requests.get(UserInfoAPI, headers=headers.headers_vacc, cookies=jar, verify=False)
-# print(UserInfo_response.text)
-
-# {"error":"error occurred"}
-UserInfoJsonLoaded = json.loads(UserInfo_response.text)
-if UserInfoJsonLoaded.get('error'):
-    print("사용자 정보를 불러오는데 실패하였습니다.")
-    print("Chrome 브라우저에서 카카오에 제대로 로그인되어있는지 확인해주세요.")
-    print("로그인이 되어 있는데도 안된다면, 카카오톡에 들어가서 잔여백신 알림 신청을 한번 해보세요. 정보제공 동의가 나온다면 동의 후 다시 시도해주세요.")
-    close()
-else:
-    UserInfojsonData = UserInfoJsonLoaded.get("user")
-    for key in UserInfojsonData:
-        value = UserInfojsonData[key]
-        # print(key, value)
-        if key != 'status':
-            continue
-        if key == 'status' and value == "NORMAL":
-            print("사용자 정보를 불러오는데 성공했습니다.")
-            break
-        else:
-            print("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
-            close()
 
 APIURL = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
 APIdata = {"bottomRight":{"x":botx ,"y":boty},"onlyLeft": False,"order":"latitude","topLeft":{"x":topx,"y":topy}}
