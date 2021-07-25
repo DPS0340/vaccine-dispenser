@@ -26,7 +26,7 @@ skip_input = False
 
 def close():
     input("Press Enter to close...")
-    exit()
+    sys.exit()
 
 def clear():
     if 'win' in sys.platform.lower():
