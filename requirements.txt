@@ -1,6 +1,5 @@
 requests
 urllib3
-os
 time
 datetime
 configparser
