@@ -22,6 +22,7 @@ requests.adapters.DEFAULT_RETRIES = 5
 jar = http.cookiejar.CookieJar()
 jar = browser_cookie3.chrome(domain_name=".kakao.com")
 
+skip_input = False
 
 def close():
     input("Press Enter to close...")
