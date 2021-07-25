@@ -41,5 +41,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          name: Windows-Binary
+          name: Mac-Binary
           path: vaccine-run-kakao-macos.zip
