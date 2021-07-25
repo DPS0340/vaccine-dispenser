@@ -19,6 +19,7 @@ from pygame import mixer
 from sys import platform
 urllib3.disable_warnings()
 requests.adapters.DEFAULT_RETRIES = 5
+retries = Retry(total=5, allowed_methods=frozenset(['GET', 'POST']))
 jar = http.cookiejar.CookieJar()
 jar = browser_cookie3.chrome(domain_name=".kakao.com")
 
@@ -147,7 +148,7 @@ def try_reservation(orgCdCode, vacc_code):
 
 UserInfoAPI = 'https://vaccine.kakao.com/api/v1/user'
 # print(jar)
-UserInfo_response = requests.get(UserInfoAPI, headers=headers.headers_vacc, cookies=jar, verify=False)
+UserInfo_response = requests.get(UserInfoAPI, headers=headers.headers_vacc, cookies=jar, verify=False, retries=True)
 # print(UserInfo_response.text)
 
 # {"error":"error occurred"}
