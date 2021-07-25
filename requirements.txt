@@ -1,5 +1,4 @@
 requests
-requests
 urllib3
 os
 time
