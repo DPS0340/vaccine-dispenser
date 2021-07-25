@@ -3,9 +3,6 @@
 
 
 search_time = 0.26    # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
-open_delay = 0.1        # 잔여백신 발생 시 브라우저를 열기 전 지연시간. 단위: 초
-
-
 
 
 import requests
@@ -15,14 +12,31 @@ import os
 import time
 import datetime
 import configparser
+import sys
+import browser_cookie3
+import http.cookiejar
+from pygame import mixer
 from sys import platform
 urllib3.disable_warnings()
 requests.adapters.DEFAULT_RETRIES = 5
+jar = http.cookiejar.CookieJar()
+jar = browser_cookie3.chrome(domain_name=".kakao.com")
 
 
 def close():
     input("Press Enter to close...")
     exit()
+
+def clear():
+    if 'win' in sys.platform.lower():
+        os.system('cls')
+    else:
+        os.system('clear')
+
+def play_sound():
+    mixer.init()
+    mixer.music.load('tada.mp3')
+    mixer.music.play()
 
 
 config_parser = configparser.ConfigParser()
@@ -56,16 +70,6 @@ if os.path.exists('config.ini'):
         pass
 
 
-always_repeat = str.lower(input("잔여백신이 발생해도 프로그램을 멈추지 않으시겠습니까? Y/N : "))
-if always_repeat == "y":
-    always_repeat = True
-elif always_repeat == "n":
-    always_repeat = False
-else:
-    print("Y 또는 N을 입력해 주세요.")
-    close()
-
-
 def pretty_print(json_string):
     json_object = json.loads(json_string)
     for org in json_object["organizations"]:
@@ -73,8 +77,74 @@ def pretty_print(json_string):
             continue
         print(f"잔여갯수: {org.get('leftCounts')}\t상태: {org.get('status')}\t기관명: {org.get('orgName')}\t주소: {org.get('address')}")
 
+class headers:
+    headers_map = {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json;charset=utf-8",
+        "Origin": "https://vaccine-map.kakao.com",
+        "Accept-Language": "en-us",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
+        "Referer":"https://vaccine-map.kakao.com/",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+    }
+    headers_vacc = {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json;charset=utf-8",
+        "Origin": "https://vaccine.kakao.com",
+        "Accept-Language": "en-us",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
+        "Referer":"https://vaccine.kakao.com/",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+    }
+
+def try_reservation(orgCdCode, vacc_code):
+    for i in range(6):
+        ReservationURL = 'https://vaccine.kakao.com/api/v1/reservation'
+        Reservation_APIdata = {"from":"Map","vaccineCode":vacc_code,"orgCode":orgCdCode,"distance":"null"}
+        Reservation_Response = requests.post(ReservationURL, data=json.dumps(Reservation_APIdata), headers=headers.headers_vacc, cookies=jar, verify=False)
+        Reservation_Response_jsonloaded = json.loads(Reservation_Response.text)
+        print(Reservation_Response_jsonloaded)
+        for key in Reservation_Response_jsonloaded:
+            value = Reservation_Response_jsonloaded[key]
+            if key != 'code':
+                continue
+            if key == 'code' and value == "NO_VACANCY":
+                print("잔여백신 접종 신청이 선착순 마감되었습니다.")
+                time.sleep(0.1)
+            elif key == 'code' and value == "SUCCESS":
+                print("백신접종신청 성공!!!")
+                Success_Org = Reservation_Response.text["organizations"]
+                print(f"병원이름: {Success_Org.get('orgName')}\t전화번호: {Success_Org.get('phoneNumber')}\t주소: {Success_Org.get('address')}\t운영시간: {Success_Org.get('openHour')}")
+                play_sound()
+                close()
+            else:
+                print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
+                print(Reservation_Response.text)
+                play_sound()
+                close()
+
+    find_vaccine() # Close 안되면 다시 백신검색
+
 
 # ===================================== def ===================================== #
+
+
+
+# Get Cookie
+# driver = selenium.webdriver.Firefox()
+# driver.get("https://cs.kakao.com")
+# pickle.dump( driver.get_cookies() , open("cookies.pkl","wb"))
+# cookies = pickle.load(open("cookies.pkl", "rb"))
+# for cookie in cookies:
+#     driver.add_cookie(cookie)
+#     print(cookie)
+
+
+
 if skip_input == False:
     VAC = None
     while VAC == None:
@@ -83,7 +153,8 @@ if skip_input == False:
         print("모더나         : VEN00014")
         print("아스크라제네카   : VEN00015")
         print("얀센          : VEN00016")
-        VAC = input(f"예약시도할 백신 코드를 알려주세요.(최근 사용 : {prevVAC}): ")
+        print("아무거나       : ANY")
+        VAC = input(f"예약시도할 백신 코드를 알려주세요. (최근 사용 : {prevVAC}): ")
         if not VAC.strip():
             VAC = prevVAC
             
@@ -116,10 +187,36 @@ elif skip_input == True:
     boty = prevboty
 else:
     print("문제가 발생했습니다. 프로그램을 종료합니다.")
-    exit()
+    close()
 
     
-APIURL = 'http://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
+
+UserInfoAPI = 'https://vaccine.kakao.com/api/v1/user'
+# print(jar)
+UserInfo_response = requests.get(UserInfoAPI, headers=headers.headers_vacc, cookies=jar, verify=False)
+# print(UserInfo_response.text)
+
+# {"error":"error occurred"}
+UserInfoJsonLoaded = json.loads(UserInfo_response.text)
+if UserInfoJsonLoaded.get('error'):
+    print("사용자 정보를 불러오는데 실패하였습니다.")
+    print("Chrome 브라우저에서 카카오에 제대로 로그인되어있는지 확인해주세요.")
+    close()
+else:
+    UserInfojsonData = UserInfoJsonLoaded.get("user")
+    for key in UserInfojsonData:
+        value = UserInfojsonData[key]
+        # print(key, value)
+        if key != 'status':
+            continue
+        if key == 'status' and value == "NORMAL":
+            print("사용자 정보를 불러오는데 성공했습니다.")
+            break
+        else:
+            print("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
+            close()
+
+APIURL = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
 APIdata = {"bottomRight":{"x":botx ,"y":boty},"onlyLeft": False,"order":"latitude","topLeft":{"x":topx,"y":topy}}
 config_parser['config'] = {}
 conf = config_parser['config']
@@ -134,22 +231,11 @@ with open("config.ini", "w") as config_file:
 
 def find_vaccine():
     print(APIdata)
-    headers = {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=utf-8",
-        "Origin": "https://vaccine-map.kakao.com",
-        "Accept-Language": "en-us",
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
-        "Referer":"https://vaccine-map.kakao.com/",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "Keep-Alive",
-        "Keep-Alive": "timeout=5, max=1000"
-    }
 
     done = False
     while done == False:
         time.sleep(search_time)
-        response = requests.post(APIURL, data=json.dumps(APIdata), headers=headers, verify=False)
+        response = requests.post(APIURL, data=json.dumps(APIdata), headers=headers.headers_map, cookies=jar, verify=False)
 
         received_API_status_code = response.status_code
         received_API_data = response.text
@@ -174,23 +260,43 @@ def find_vaccine():
     print("--- found")
     print(found)
     orgCdCode = x.get('orgCode')
-    latkey = x.get('y')
-    lngkey = x.get('x')
 
-    time.sleep(open_delay)
-    if platform == "linux" or platform == "linux2":
-        os.system(f'/usr/bin/google-chrome "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
-    elif platform == "darwin":
-        os.system(f'/usr/bin/open -a "/Applications/Google Chrome.app" "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
-    elif platform == "win32":
-        os.system(f'start chrome.exe "https://vaccine.kakao.com/reservation/{orgCdCode}?from=Map&code={VAC}"')
+
+
+
+    # 실제 백신 남은수량 확인
+    VAC_found_code = ''
+
+    Check_Org_URL = 'https://vaccine.kakao.com/api/v2/org/org_code/'+ orgCdCode
+    Check_Org_response = requests.get(Check_Org_URL, headers=headers.headers_vacc, cookies=jar, verify=False)
+    # print(Check_Org_response.text)
+    Check_Org_jsonloaded = json.loads(Check_Org_response.text)
+    Check_Org_jsonData = Check_Org_jsonloaded["lefts"]
+    for x in Check_Org_jsonData:
+        if VAC != "ANY": # 특정 백신 선택
+            if x.get('vaccineCode') == VAC and x.get('leftCount') != 0:
+                found = x
+                print(found)
+                VAC_found_code = x.get('vaccineCode')
+                break
+            else:
+                print("검색 도중 백신이 모두 소진되었거나 선택한 백신이 재고가 없습니다.")
+                find_vaccine()
+        else: # 아무 백신
+            if x.get('leftCount') != 0:
+                found = x
+                print(found)
+                VAC_found_code = x.get('vaccineCode')
+                break
+            else:
+                print("검색 도중 백신이 모두 소진되었습니다.")
+                find_vaccine()
+
+    if VAC_found_code != '':
+        try_reservation(orgCdCode, VAC_found_code)
 
 
 # ===================================== run ===================================== #
 
 find_vaccine()
-while always_repeat == True:
-    find_vaccine()
-
-
 close()
