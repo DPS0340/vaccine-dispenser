@@ -19,7 +19,7 @@ from pygame import mixer
 from sys import platform
 
 # import for testing Windows bugfix
-import ndg-httpsclient
+import ndg.httpsclient
 import pyopenssl
 import pyasn1
 
