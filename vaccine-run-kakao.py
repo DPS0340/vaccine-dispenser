@@ -20,8 +20,6 @@ from sys import platform
 
 # import for testing Windows bugfix
 import ndg.httpsclient
-import pyopenssl
-import pyasn1
 
 urllib3.disable_warnings()
 requests.adapters.DEFAULT_RETRIES = 5
