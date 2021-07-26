@@ -17,6 +17,12 @@ import browser_cookie3
 import http.cookiejar
 from pygame import mixer
 from sys import platform
+
+# import for testing Windows bugfix
+import ndg-httpsclient
+import pyopenssl
+import pyasn1
+
 urllib3.disable_warnings()
 requests.adapters.DEFAULT_RETRIES = 5
 urllib3.util.Retry.allowed_methods=frozenset(['GET', 'POST'])
