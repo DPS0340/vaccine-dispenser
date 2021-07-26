@@ -4,3 +4,6 @@ datetime
 configparser
 browser_cookie3
 pygame
+ndg-httpsclient
+pyopenssl
+pyasn1
