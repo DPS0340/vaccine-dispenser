@@ -271,7 +271,7 @@ def find_vaccine():
 
 
     print("--- found")
-    print(f"{found.get('orgName')} 병원에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
+    print(f"{found.get('orgName')} 에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
     print(f"주소는 : {found.get('address')} 입니다.")
     orgCdCode = x.get('orgCode')
 
