@@ -120,7 +120,6 @@ def try_reservation(orgCdCode, vacc_code):
         Reservation_APIdata = {"from":"Map","vaccineCode":vacc_code,"orgCode":orgCdCode,"distance":"null"}
         Reservation_Response = requests.post(ReservationURL, data=json.dumps(Reservation_APIdata), headers=headers.headers_vacc, cookies=jar, verify=False)
         Reservation_Response_jsonloaded = json.loads(Reservation_Response.text)
-        print(Reservation_Response_jsonloaded)
         for key in Reservation_Response_jsonloaded:
             value = Reservation_Response_jsonloaded[key]
             if key != 'code':
@@ -272,7 +271,8 @@ def find_vaccine():
 
 
     print("--- found")
-    print(found)
+    print(f"{found.get('orgName')} 병원에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
+    print(f"주소는 : {found.get('address')} 입니다.")
     orgCdCode = x.get('orgCode')
 
 
@@ -283,6 +283,7 @@ def find_vaccine():
 
     if VAC != "ANY": # 특정 백신 선택
         VAC_found_code = VAC
+        print(f"{VAC_found_code} 으로 예약을 시도합니다.")
     else: # ANY 백신 선택
         Check_Org_URL = 'https://vaccine.kakao.com/api/v2/org/org_code/'+ orgCdCode
         Check_Org_response = requests.get(Check_Org_URL, headers=headers.headers_vacc, cookies=jar, verify=False)
@@ -292,11 +293,12 @@ def find_vaccine():
         for x in Check_Org_jsonData:
             if x.get('leftCount') != 0:
                 found = x
-                print(found)
+                print(f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
                 VAC_found_code = x.get('vaccineCode')
+                print(f"{VAC_found_code} 으로 예약을 시도합니다.")
                 break
             else:
-                print("검색 도중 백신이 모두 소진되었습니다.")
+                print(f"{x.get('vaccineName')} 백신이 없습니다.")
     
 
     if VAC_found_code != '':
