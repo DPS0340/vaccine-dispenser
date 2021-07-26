@@ -111,7 +111,7 @@ class headers:
     }
 
 def try_reservation(orgCdCode, vacc_code):
-    for i in range(6):
+    for i in range(4):
         ReservationURL = 'https://vaccine.kakao.com/api/v1/reservation'
         Reservation_APIdata = {"from":"Map","vaccineCode":vacc_code,"orgCode":orgCdCode,"distance":"null"}
         Reservation_Response = requests.post(ReservationURL, data=json.dumps(Reservation_APIdata), headers=headers.headers_vacc, cookies=jar, verify=False)
