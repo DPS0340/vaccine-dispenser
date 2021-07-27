@@ -6,7 +6,7 @@
 1. Chrome 브라우저를 이용하여 모든 작업을 진행하므로, 크롬 브라우저를 실행해주세요.
 2. [카카오 계정 로그인 페이지](https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1) 에 접근하여 카카오 로그인을 합니다. [로그인 시 주의사항](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/issues/82)
 3. [#2](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/2)를 보고 잔여백신을 검색할 범위의 좌표값을 찾습니다.
-4. Release 페이지에서 `vaccine-run-kakao-windows.zip`을 받아 압축해제하고, exe 파일을 실행합니다.
+4. [Release 페이지](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/releases/latest)에서 본인의 운영체제에 맞는 파일을 다운로드 받고 실행합니다.
 5. 사용자 권한 동의를 요청하면 승인해주세요. 자동으로 검색 및 예약시도를 진행합니다.
 6. 예약 성공 시 빵빠레 소리와 함께 예약이 성공했음이 안내됩니다.
 
