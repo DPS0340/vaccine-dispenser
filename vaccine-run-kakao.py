@@ -215,7 +215,7 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
     while not done:
         time.sleep(search_time)
-        response = requests.post(url, data=json.dumps(data), headers=Headers.headers_map, cookies=jar, verify=False)
+        response = requests.post(url, data=json.dumps(data), headers=Headers.headers_map, verify=False)
 
         pretty_print(response.text)
         print(datetime.now())
