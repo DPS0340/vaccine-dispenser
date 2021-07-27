@@ -244,18 +244,23 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
         except requests.exceptions.Timeout as timeouterror:
             print("Timeout Error : ", timeouterror)
+            close()
 
         except requests.exceptions.ConnectionError as connectionerror:
             print("Connecting Error : ", connectionerror)
+            close()
 
         except requests.exceptions.HTTPError as httperror:
             print("Http Error : ", httperror)
+            close()
 
         except requests.exceptions.SSLError as sslerror:
             print("SSL Error : ", sslerror)
+            close()
 
         except requests.exceptions.RequestException as error:
             print("AnyException : ", error)
+            close()
 
     if found is None:
         find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y)
