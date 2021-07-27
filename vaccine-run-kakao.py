@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import time
+import playsound
 from datetime import datetime
 
 import urllib3
@@ -130,6 +131,14 @@ def clear():
         os.system('cls')
     else:
         os.system('clear')
+        
+def resource_path(relative_path):
+     """ Get absolute path to resource, works for dev and for PyInstaller """
+     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+     return os.path.join(base_path, relative_path)
+
+def play_tada():
+    playsound(resource_path('tada.mp3'))
 
 
 def pretty_print(json_string):
@@ -185,6 +194,7 @@ def try_reservation(organization_code, vaccine_type):
                 organization_code_success = response_json.get("organization")
                 print(
                     f"병원이름: {organization_code_success.get('orgName')}\t전화번호: {organization_code_success.get('phoneNumber')}\t주소: {organization_code_success.get('address')}\t운영시간: {organization_code_success.get('openHour')}")
+                play_tada()
                 close()
             else:
                 print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
