@@ -243,11 +243,11 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
         for x in check_organization_data:
             if x.get('leftCount') != 0:
                 found = x
-                print(f"{found.get('vaccineName')} 백신을 {found.get('leftCount')}개 발견했습니다.")
+                print(f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
                 vaccine_found_code = x.get('vaccineCode')
                 break
             else:
-                print(f"{found.get('vaccineName')} 백신이 없습니다.")
+                print(f"{x.get('vaccineName')} 백신이 없습니다.")
 
     else:
         vaccine_found_code = vaccine_type
