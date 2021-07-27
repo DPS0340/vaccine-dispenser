@@ -105,6 +105,7 @@ def input_config():
     while bottom_y is None:
         bottom_y = input(f"사각형의 아래쪽 우측 y값을 넣어주세요 37.xxxxxx: ").strip()
 
+    dump_config(vaccine_type, top_x, top_y, bottom_x, bottom_y)
     return vaccine_type, top_x, top_y, bottom_x, bottom_y
 
 
