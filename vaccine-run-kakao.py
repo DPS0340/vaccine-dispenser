@@ -49,7 +49,7 @@ def load_config():
                 return None, None, None, None, None
         except ValueError:
             return None, None, None, None, None
-
+    return None, None, None, None, None
 
 def check_user_info_loaded():
     user_info_api = 'https://vaccine.kakao.com/api/v1/user'
