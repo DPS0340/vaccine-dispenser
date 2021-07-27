@@ -7,7 +7,7 @@ import json
 import os
 import sys
 import time
-import playsound
+from playsound import playsound
 from datetime import datetime
 
 import urllib3
@@ -50,6 +50,7 @@ def load_config():
         except ValueError:
             return None, None, None, None, None
     return None, None, None, None, None
+
 
 def check_user_info_loaded():
     user_info_api = 'https://vaccine.kakao.com/api/v1/user'
@@ -131,11 +132,13 @@ def clear():
         os.system('cls')
     else:
         os.system('clear')
-        
+
+
 def resource_path(relative_path):
-     """ Get absolute path to resource, works for dev and for PyInstaller """
-     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-     return os.path.join(base_path, relative_path)
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
 
 def play_tada():
     playsound(resource_path('tada.mp3'))
@@ -179,7 +182,8 @@ def try_reservation(organization_code, vaccine_type):
     reservation_url = 'https://vaccine.kakao.com/api/v1/reservation'
     for i in range(3):
         data = {"from": "Map", "vaccineCode": vaccine_type, "orgCode": organization_code, "distance": "null"}
-        response = requests.post(reservation_url, data=json.dumps(data), headers=Headers.headers_vacc, cookies=jar, verify=False)
+        response = requests.post(reservation_url, data=json.dumps(data), headers=Headers.headers_vacc, cookies=jar,
+                                 verify=False)
         response_json = json.loads(response.text)
         print(response_json)
         for key in response_json:
@@ -248,7 +252,8 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
     if vaccine_type == "ANY":  # ANY 백신 선택
         check_organization_url = f'https://vaccine.kakao.com/api/v2/org/org_code/{organization_code}'
-        check_organization_response = requests.get(check_organization_url, headers=Headers.headers_vacc, cookies=jar, verify=False)
+        check_organization_response = requests.get(check_organization_url, headers=Headers.headers_vacc, cookies=jar,
+                                                   verify=False)
         check_organization_data = json.loads(check_organization_response.text).get("lefts")
         for x in check_organization_data:
             if x.get('leftCount') != 0:
