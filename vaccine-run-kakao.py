@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import time
+import http.cookiejar
 from playsound import playsound
 from datetime import datetime
 
@@ -15,6 +16,7 @@ import urllib3
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
+jar = http.cookiejar.CookieJar()
 jar = browser_cookie3.chrome(domain_name=".kakao.com")
 
 
@@ -159,7 +161,7 @@ class Headers:
         "Content-Type": "application/json;charset=utf-8",
         "Origin": "https://vaccine-map.kakao.com",
         "Accept-Language": "en-us",
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.4.2",
         "Referer": "https://vaccine-map.kakao.com/",
         "Accept-Encoding": "gzip, deflate",
         "Connection": "Keep-Alive",
@@ -170,7 +172,7 @@ class Headers:
         "Content-Type": "application/json;charset=utf-8",
         "Origin": "https://vaccine.kakao.com",
         "Accept-Language": "en-us",
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.3.8",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.4.2",
         "Referer": "https://vaccine.kakao.com/",
         "Accept-Encoding": "gzip, deflate",
         "Connection": "Keep-Alive",
