@@ -246,6 +246,7 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
         except json.decoder.JSONDecodeError as decodeerror:
             print("JSONDecodeError : ", decodeerror)
             print("JSON string : ", response.text)
+            close()
 
         except requests.exceptions.Timeout as timeouterror:
             print("Timeout Error : ", timeouterror)
