@@ -71,8 +71,10 @@ jobs:
       run: |
         pyinstaller --add-data tada.mp3:. --onefile vaccine-run-kakao.py
         chmod +x dist/vaccine-run-kakao
+    - name: Tar file
+      run: tar -cvf dist/vaccine-run-kakao.tar dist/vaccine-run-kakao
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
           name: Mac-Binary
-          path: dist/vaccine-run-kakao
+          path: dist/vaccine-run-kakao.tar
