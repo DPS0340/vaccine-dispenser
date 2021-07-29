@@ -125,11 +125,6 @@ def dump_config(vaccine_type, top_x, top_y, bottom_x, bottom_y):
         config_parser.write(config_file)
 
 
-def close():
-    input("Press Enter to close...")
-    sys.exit()
-
-
 def clear():
     if 'win' in sys.platform.lower():
         os.system('cls')
@@ -145,6 +140,19 @@ def resource_path(relative_path):
 
 def play_tada():
     playsound(resource_path('tada.mp3'))
+
+
+def play_xylophon():
+    playsound(resource_path('xylophon.mp3'))
+
+
+def close(success=False):
+    if success: 
+        play_tada()
+    else:
+        play_xylophon()
+    input("Press Enter to close...")
+    sys.exit()
 
 
 def pretty_print(json_object):
@@ -182,7 +190,6 @@ class Headers:
 
 def try_reservation(organization_code, vaccine_type):
     reservation_url = 'https://vaccine.kakao.com/api/v1/reservation'
-
     data = {"from": "Map", "vaccineCode": vaccine_type, "orgCode": organization_code, "distance": "null"}
     response = requests.post(reservation_url, data=json.dumps(data), headers=Headers.headers_vacc, cookies=jar, verify=False)
     response_json = json.loads(response.text)
@@ -201,8 +208,7 @@ def try_reservation(organization_code, vaccine_type):
             organization_code_success = response_json.get("organization")
             print(
                 f"병원이름: {organization_code_success.get('orgName')}\t전화번호: {organization_code_success.get('phoneNumber')}\t주소: {organization_code_success.get('address')}")
-            play_tada()
-            close()
+            close(success=True)
         else:
             print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
             print(response.text)
@@ -227,8 +233,7 @@ def retry_reservation(organization_code, vaccine_type):
             organization_code_success = response_json.get("organization")
             print(
                 f"병원이름: {organization_code_success.get('orgName')}\t전화번호: {organization_code_success.get('phoneNumber')}\t주소: {organization_code_success.get('address')}")
-            play_tada()
-            close()
+            close(success=True)
         else:
             print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
             print(response.text)
