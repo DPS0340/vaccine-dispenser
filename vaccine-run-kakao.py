@@ -222,9 +222,6 @@ def retry_reservation(organization_code, vaccine_type):
         if key == 'code' and value == "NO_VACANCY":
             print("잔여백신 접종 신청이 선착순 마감되었습니다.")
             time.sleep(0.08)
-        elif key == 'code' and value == "TIMEOUT":
-            print("TIMEOUT(서버오류).. 예약이 성공했을 수도 실패했을 수도 있으나, 우선은 실패했다고 생각하세요.")
-            print(response.text)
         elif key == 'code' and value == "SUCCESS":
             print("백신접종신청 성공!!!")
             organization_code_success = response_json.get("organization")
