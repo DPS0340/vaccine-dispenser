@@ -261,7 +261,7 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
     while not done:
         try:
             time.sleep(search_time)
-            response = requests.post(url, data=json.dumps(data), headers=Headers.headers_map, verify=False)
+            response = requests.post(url, data=json.dumps(data), headers=Headers.headers_map, verify=False, timeout=5)
 
             json_data = json.loads(response.text)
 
@@ -281,7 +281,7 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
         except requests.exceptions.Timeout as timeouterror:
             print("Timeout Error : ", timeouterror)
-            close()
+            #close()
 
         except requests.exceptions.ConnectionError as connectionerror:
             print("Connecting Error : ", connectionerror)
