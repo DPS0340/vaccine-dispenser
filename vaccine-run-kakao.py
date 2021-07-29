@@ -149,8 +149,10 @@ def play_xylophon():
 def close(success=False):
     if success: 
         play_tada()
+        send_msg("잔여백신 예약 성공!! \n 카카오톡지갑을 확인하세요.")
     else:
         play_xylophon()
+        send_msg("오류와 함께 잔여백신 예약 프로그램이 종료되었습니다.")
     input("Press Enter to close...")
     sys.exit()
 
@@ -208,7 +210,6 @@ def try_reservation(organization_code, vaccine_type):
             organization_code_success = response_json.get("organization")
             print(
                 f"병원이름: {organization_code_success.get('orgName')}\t전화번호: {organization_code_success.get('phoneNumber')}\t주소: {organization_code_success.get('address')}")
-            send_msg("예약 성공!! \n 카카오톡지갑을 확인하세요")
             close(success=True)
         else:
             print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
@@ -234,7 +235,6 @@ def retry_reservation(organization_code, vaccine_type):
             organization_code_success = response_json.get("organization")
             print(
                 f"병원이름: {organization_code_success.get('orgName')}\t전화번호: {organization_code_success.get('phoneNumber')}\t주소: {organization_code_success.get('address')}")
-            send_msg("예약 성공!! \n 카카오톡지갑을 확인하세요")
             close(success=True)
         else:
             print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
