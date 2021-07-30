@@ -1,6 +1,7 @@
 # korea-covid-19-remaining-vaccine-macro
 잔여백신 지도 API로 남은 백신 수를 확인하고, 잔여백신이 있는 경우 잔여백신 예약 페이지로 이동합니다.
 
+### 자세한 내용은 [공지사항](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/468)을 참고하세요.
 ## 카카오 잔여백신 예약
 ### 이용방법
 1. Chrome 브라우저를 이용하여 모든 작업을 진행하므로, 크롬 브라우저를 실행해주세요.
