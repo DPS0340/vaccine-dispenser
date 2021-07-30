@@ -3,7 +3,7 @@
 
                 
 
-![Visitors](https://api.visitorbadge.io/api/daily?user=SJang1&repo=korea-covid-19-remaining-vaccine-macro&label=DAILY_README_VEIWS&countColor=%23263759)
+![Visitors](https://api.visitorbadge.io/api/daily?user=SJang1&repo=korea-covid-19-remaining-vaccine-macro&label=DAILY_README_VIEWS&countColor=%23263759)
 
 ### 자세한 내용은 [공지사항](https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/468)을 참고하세요.
 ## 카카오 잔여백신 예약
