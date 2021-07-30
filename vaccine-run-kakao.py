@@ -223,7 +223,7 @@ def try_reservation(organization_code, vaccine_type):
 def retry_reservation(organization_code, vaccine_type):
     reservation_url = 'https://vaccine.kakao.com/api/v1/reservation/retry'
 
-    data = {"from": "Map", "vaccineCode": vaccine_type, "orgCode": organization_code, "distance": "null"}
+    data = {"from": "Map", "vaccineCode": vaccine_type, "orgCode": organization_code, "distance": None}
     response = requests.post(reservation_url, data=json.dumps(data), headers=Headers.headers_vacc, cookies=jar, verify=False)
     response_json = json.loads(response.text)
     for key in response_json:
