@@ -7,7 +7,6 @@ on:
 jobs:
   virustotal:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Remove this line only after add `VT_API_KEY` on secret env.
     steps:
     - name: VirusTotal Scan
       uses: crazy-max/ghaction-virustotal@v2
