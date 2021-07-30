@@ -2,7 +2,7 @@ name: VirusTotal scan after released
 
 on:
   release:
-    types: [published]
+    types: [released]
 
 jobs:
   virustotal:
