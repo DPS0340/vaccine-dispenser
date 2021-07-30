@@ -333,15 +333,15 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
         except requests.exceptions.Timeout as timeouterror:
             print("Timeout Error : ", timeouterror)
-            #close()
 
         except requests.exceptions.SSLError as sslerror:
             print("SSL Error : ", sslerror)
             close()
 
         except requests.exceptions.ConnectionError as connectionerror:
-            print("Connecting Error : ", connectionerror)
-            close()
+            print("Connection Error : ", connectionerror)
+            # Temp fix for psf/requests#5430
+            #close()
 
         except requests.exceptions.HTTPError as httperror:
             print("Http Error : ", httperror)
