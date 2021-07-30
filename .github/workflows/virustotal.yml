@@ -2,10 +2,10 @@ name: VirusTotal scan after released
 
 on:
   release:
-    types: [released]
+    types: [published, created, prereleased, released, edited]
 
 jobs:
-  virustotal:
+  VirusTotal:
     runs-on: ubuntu-latest
     steps:
     - name: VirusTotal Scan
