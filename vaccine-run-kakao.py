@@ -341,6 +341,7 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
         except requests.exceptions.ConnectionError as connectionerror:
             print("Connection Error : ", connectionerror)
+            # See psf/requests#5430 to know why this is necessary.
             if not re.search('Read timed out', str(connectionerror), re.IGNORECASE):
                 close()
 
