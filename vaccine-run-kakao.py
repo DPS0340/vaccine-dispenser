@@ -7,7 +7,6 @@ import json
 import os
 import sys
 import time
-import http.cookiejar
 from playsound import playsound
 from datetime import datetime
 import telepot
@@ -18,7 +17,6 @@ import re
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
-jar = http.cookiejar.CookieJar()
 jar = browser_cookie3.chrome(domain_name=".kakao.com")
 
 
@@ -58,7 +56,8 @@ def load_config():
 
 def check_user_info_loaded():
     user_info_api = 'https://vaccine.kakao.com/api/v1/user'
-    user_info_response = requests.get(user_info_api, headers=Headers.headers_vacc, cookies=jar, verify=False)
+    user_info_response = requests.get(
+        user_info_api, headers=Headers.headers_vacc, cookies=jar, verify=False)
     user_info_json = json.loads(user_info_response.text)
     if user_info_json.get('error'):
         print("사용자 정보를 불러오는데 실패하였습니다.")
@@ -98,7 +97,6 @@ def fill_str_with_space(input_s, max_size=40, fill_char=" "):
     return input_s + fill_char * (max_size - length)
 
 
-
 def input_config():
     vaccine_candidates = [
         {"name": "아무거나", "code": "ANY"},
@@ -117,7 +115,8 @@ def input_config():
         for vaccine in vaccine_candidates:
             if vaccine["name"] == "(미사용)":
                 continue
-            print(f"{fill_str_with_space(vaccine['name'], 10)} : {vaccine['code']}")
+            print(
+                f"{fill_str_with_space(vaccine['name'], 10)} : {vaccine['code']}")
 
         vaccine_type = str.upper(input("예약시도할 백신 코드를 알려주세요: ").strip())
         if any(x["code"] == vaccine_type for x in vaccine_candidates) or vaccine_type.startswith("FORCE:"):
@@ -127,7 +126,7 @@ def input_config():
                 print("경고: 강제 코드 입력모드를 사용하셨습니다.\n" +
                       "이 모드는 새로운 백신이 예약된 코드로 **등록되지 않은 경우에만** 사용해야 합니다.\n" +
                       "입력하신 코드가 정상적으로 작동하는 백신 코드인지 필히 확인해주세요.\n" +
-                     f"현재 코드: '{vaccine_type}'\n")
+                      f"현재 코드: '{vaccine_type}'\n")
 
                 if (len(vaccine_type) != 8 or not vaccine_type.startswith("VEN") or not vaccine_type[3:].isdigit()):
                     print("입력하신 코드가 현재 알려진 백신 코드 형식이랑 맞지 않습니다.")
@@ -143,7 +142,7 @@ def input_config():
             if vaccine["name"] == "(미사용)":
                 print("현재 프로그램 버전에서 백신 이름이 등록되지 않은, 추후를 위해 미리 넣어둔 백신 코드입니다.\n" +
                       "입력하신 코드가 정상적으로 작동하는 백신 코드인지 필히 확인해주세요.\n" +
-                     f"현재 코드: '{vaccine_type}'\n")
+                      f"현재 코드: '{vaccine_type}'\n")
 
             break
         else:
@@ -193,7 +192,8 @@ def clear():
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(
+        os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
 
@@ -206,7 +206,7 @@ def play_xylophon():
 
 
 def close(success=False):
-    if success: 
+    if success:
         play_tada()
         send_msg("잔여백신 예약 성공!! \n 카카오톡지갑을 확인하세요.")
     else:
@@ -251,8 +251,10 @@ class Headers:
 
 def try_reservation(organization_code, vaccine_type):
     reservation_url = 'https://vaccine.kakao.com/api/v1/reservation'
-    data = {"from": "Map", "vaccineCode": vaccine_type, "orgCode": organization_code, "distance": None}
-    response = requests.post(reservation_url, data=json.dumps(data), headers=Headers.headers_vacc, cookies=jar, verify=False)
+    data = {"from": "Map", "vaccineCode": vaccine_type,
+            "orgCode": organization_code, "distance": None}
+    response = requests.post(reservation_url, data=json.dumps(
+        data), headers=Headers.headers_vacc, cookies=jar, verify=False)
     response_json = json.loads(response.text)
     for key in response_json:
         value = response_json[key]
@@ -277,11 +279,14 @@ def try_reservation(organization_code, vaccine_type):
             print(response.text)
             close()
 
+
 def retry_reservation(organization_code, vaccine_type):
     reservation_url = 'https://vaccine.kakao.com/api/v1/reservation/retry'
 
-    data = {"from": "Map", "vaccineCode": vaccine_type, "orgCode": organization_code, "distance": None}
-    response = requests.post(reservation_url, data=json.dumps(data), headers=Headers.headers_vacc, cookies=jar, verify=False)
+    data = {"from": "Map", "vaccineCode": vaccine_type,
+            "orgCode": organization_code, "distance": None}
+    response = requests.post(reservation_url, data=json.dumps(
+        data), headers=Headers.headers_vacc, cookies=jar, verify=False)
     response_json = json.loads(response.text)
     for key in response_json:
         value = response_json[key]
@@ -294,7 +299,7 @@ def retry_reservation(organization_code, vaccine_type):
             print("백신접종신청 성공!!!")
             organization_code_success = response_json.get("organization")
             print(
-                f"병원이름: {organization_code_success.get('orgName')}\t" + 
+                f"병원이름: {organization_code_success.get('orgName')}\t" +
                 f"전화번호: {organization_code_success.get('phoneNumber')}\t" +
                 f"주소: {organization_code_success.get('address')}")
             close(success=True)
@@ -326,7 +331,8 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
     while not done:
         try:
             time.sleep(search_time)
-            response = requests.post(url, data=json.dumps(data), headers=Headers.headers_map, verify=False, timeout=5)
+            response = requests.post(url, data=json.dumps(
+                data), headers=Headers.headers_map, verify=False, timeout=5)
 
             json_data = json.loads(response.text)
 
@@ -378,7 +384,8 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
         check_organization_url = f'https://vaccine.kakao.com/api/v2/org/org_code/{organization_code}'
         check_organization_response = requests.get(check_organization_url, headers=Headers.headers_vacc, cookies=jar,
                                                    verify=False)
-        check_organization_data = json.loads(check_organization_response.text).get("lefts")
+        check_organization_data = json.loads(
+            check_organization_response.text).get("lefts")
         for x in check_organization_data:
             if x.get('leftCount') != 0:
                 found = x
@@ -407,7 +414,8 @@ def main_function():
         vaccine_type, top_x, top_y, bottom_x, bottom_y = previous_used_type, previous_top_x, previous_top_y, previous_bottom_x, previous_bottom_y
     find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y)
     close()
-    
+
+
 def send_msg(msg):
     config_parser = configparser.ConfigParser()
     if os.path.exists('telegram.txt'):
