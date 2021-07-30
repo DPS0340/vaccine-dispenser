@@ -2,7 +2,7 @@
 잔여백신 지도 API로 남은 백신 수를 확인하고, 잔여백신이 있는 경우 잔여백신 예약 페이지로 이동합니다.
 
 
-![Daily Visitors](https://api.visitorbadge.io/api/daily?user=SJang1&repo=korea-covid-19-remaining-vaccine-macro&countColor=%23263759)
+![Daily README VEIWS](https://api.visitorbadge.io/api/daily?user=SJang1&repo=korea-covid-19-remaining-vaccine-macro&countColor=%23263759)
 
                 
 
