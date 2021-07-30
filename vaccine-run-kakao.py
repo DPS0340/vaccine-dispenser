@@ -120,6 +120,10 @@ def input_config():
 
         vaccine_type = str.upper(input("예약시도할 백신 코드를 알려주세요: "))
         if any(x["code"] == vaccine_type for x in vaccine_candidates):
+            if vaccine["name"] == "(미사용)":
+                print("현재 프로그램 버전에서 백신 이름이 등록되지 않은, 추후를 위해 미리 넣어둔 백신 코드입니다.\n" +
+                      "입력하신 코드가 정상적으로 작동하는 백신 코드인지 필히 확인해주세요.\n" +
+                     f"현재 코드: '{vaccine_type}'\n")
             break
         else:
             print("백신 코드를 확인해주세요.")
