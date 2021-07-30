@@ -13,6 +13,7 @@ from datetime import datetime
 import telepot
 import unicodedata
 import urllib3
+import re
 
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
@@ -340,8 +341,8 @@ def find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y):
 
         except requests.exceptions.ConnectionError as connectionerror:
             print("Connection Error : ", connectionerror)
-            # Temp fix for psf/requests#5430
-            #close()
+            if not re.search('Read timed out', str(connectionerror), re.IGNORECASE):
+                close()
 
         except requests.exceptions.HTTPError as httperror:
             print("Http Error : ", httperror)
