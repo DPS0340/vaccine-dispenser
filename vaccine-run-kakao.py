@@ -73,6 +73,9 @@ def check_user_info_loaded():
             if key == 'status' and value == "NORMAL":
                 print("사용자 정보를 불러오는데 성공했습니다.")
                 break
+            elif key == 'status' and value == "UNKNOWN":
+                print("상태를 알 수 없는 사용자입니다. 1339 또는 보건소에 문의해주세요.")
+                close()
             else:
                 print("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
                 close()
@@ -159,7 +162,7 @@ def close(success=False):
 
 def pretty_print(json_object):
     for org in json_object["organizations"]:
-        if org.get('status') == "CLOSED" or org.get('status') == "EXHAUSTED":
+        if org.get('status') == "CLOSED" or org.get('status') == "EXHAUSTED" or org.get('status') == "UNAVAILABLE":
             continue
         print(
             f"잔여갯수: {org.get('leftCounts')}\t상태: {org.get('status')}\t기관명: {org.get('orgName')}\t주소: {org.get('address')}")
