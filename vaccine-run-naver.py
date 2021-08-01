@@ -56,6 +56,6 @@ print(found.keys())
 print(found.values())
 orgCdCode = x.get('vaccineQuantity').get('vaccineOrganizationCode')
 sid = x.get('id')
-# "status":"AVALIABLE" 또는 "leftCounts":0이 아닌 것의 병원코드를 한번 가져온 후에 크롬을 열고 이 프로세스 멈추기
+# "status":"AVAILABLE" 또는 "leftCounts":0이 아닌 것의 병원코드를 한번 가져온 후에 크롬을 열고 이 프로세스 멈추기
 
 os.system('/usr/bin/open -a "/Applications/Google Chrome.app" "https://v-search.nid.naver.com/reservation/standby?orgCd=' + orgCdCode + '&sid=' + sid + '"')
