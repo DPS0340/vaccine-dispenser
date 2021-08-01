@@ -19,7 +19,8 @@ search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니�
 urllib3.disable_warnings()
 
 # 아래의 `load_cookie()` 에서 쿠키를 불러옴.
-jar=None
+jar = None
+
 
 # 기존 입력 값 로딩
 def load_config():
@@ -54,6 +55,7 @@ def load_config():
             return None, None, None, None, None
     return None, None, None, None, None
 
+
 # cookie.ini 안의 [chrome][cookie_file] 에서 경로를 로드함.
 def load_cookie_config():
     config_parser = configparser.ConfigParser(interpolation=None)
@@ -61,7 +63,7 @@ def load_cookie_config():
         try:
             config_parser.read('cookie.ini')
             cookie_file = config_parser['chrome']['cookie_file'].strip()
-            
+
             indicator = cookie_file[0]
             if indicator == '~':
                 cookie_path = os.path.expanduser(cookie_file)
@@ -77,9 +79,10 @@ def load_cookie_config():
             else:
                 print("지정된 경로에 쿠키 파일이 존재하지 않습니다. 기본값으로 시도합니다.")
                 return None
-        except Exception: # 정확한 오류를 몰라서 전부 Exception
+        except Exception:  # 정확한 오류를 몰라서 전부 Exception
             return None
     return None
+
 
 # cookie 경로가 입력되지 않았을시, 쿠키 파일이 Default 경로에 있는지 확인함
 # 경로가 입력되었거나, Default 경로의 쿠키가 존재해야 global jar 함수에 cookie를 로드함.
@@ -92,14 +95,18 @@ def load_cookie():
     os_type = platform.system()
     if os_type == "Linux":
         # browser_cookie3 also checks beta version of google chrome's cookie file.
-        cookie_path = os.path.expanduser("~/.config/google-chrome/Default/Cookies")
+        cookie_path = os.path.expanduser(
+            "~/.config/google-chrome/Default/Cookies")
         if os.path.exists(cookie_path) is False:
-            cookie_path = os.path.expanduser("~/.config/google-chrome-beta/Default/Cookies")
+            cookie_path = os.path.expanduser(
+                "~/.config/google-chrome-beta/Default/Cookies")
     elif os_type == "Darwin":
-        cookie_path = os.path.expanduser("~/Library/Application Support/Google/Chrome/Default/Cookies")
+        cookie_path = os.path.expanduser(
+            "~/Library/Application Support/Google/Chrome/Default/Cookies")
     elif os_type == "Windows":
-        cookie_path = os.path.expandvars("%LOCALAPPDATA%/Google/Chrome/User Data/Default/Cookies")
-    else: #Jython?
+        cookie_path = os.path.expandvars(
+            "%LOCALAPPDATA%/Google/Chrome/User Data/Default/Cookies")
+    else:  # Jython?
         print("지원하지 않는 환경입니다.")
         close()
 
@@ -108,7 +115,8 @@ def load_cookie():
               "https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/403")
         close()
 
-    jar = browser_cookie3.chrome(cookie_file=cookie_file, domain_name=".kakao.com")
+    jar = browser_cookie3.chrome(
+        cookie_file=cookie_file, domain_name=".kakao.com")
 
 
 def check_user_info_loaded():
@@ -155,7 +163,7 @@ def fill_str_with_space(input_s, max_size=40, fill_char=" "):
 
 
 def is_in_range(coord_type, coord, user_min_x=-180.0, user_max_y=90.0):
-    korea_coordinate = {      #Republic of Korea coordinate
+    korea_coordinate = {  # Republic of Korea coordinate
         "min_x": 124.5,
         "max_x": 132.0,
         "min_y": 33.0,
@@ -171,6 +179,7 @@ def is_in_range(coord_type, coord, user_min_x=-180.0, user_max_y=90.0):
     except ValueError:
         # float 이외 값 입력 방지
         return False
+
 
 # pylint: disable=too-many-branches
 def input_config():
@@ -215,7 +224,7 @@ def input_config():
                         print("Y 또는 N을 입력해 주세요.")
                         continue
 
-            if next((x for x in vaccine_candidates if x["code"] == vaccine_type), {"name":""})["name"] == "(미사용)":
+            if next((x for x in vaccine_candidates if x["code"] == vaccine_type), {"name": ""})["name"] == "(미사용)":
                 print("현재 프로그램 버전에서 백신 이름이 등록되지 않은, 추후를 위해 미리 넣어둔 백신 코드입니다.\n" +
                       "입력하신 코드가 정상적으로 작동하는 백신 코드인지 필히 확인해주세요.\n" +
                       f"현재 코드: '{vaccine_type}'\n")
