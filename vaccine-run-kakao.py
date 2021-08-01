@@ -130,10 +130,10 @@ def fill_str_with_space(input_s, max_size=40, fill_char=" "):
 
 def is_in_range(coord_type, coord, user_min_x=-180.0, user_max_y=90.0):
     korea_coordinate = {      #Republic of Korea coordinate
-        "min_x": 124.965323,
-        "max_x": 130.416515,
-        "min_y": 34.082053,
-        "max_y": 38.634065
+        "min_x": 124.5,
+        "max_x": 132.0,
+        "min_y": 33.0,
+        "max_y": 38.9
     }
     try:
         if coord_type == "x":
