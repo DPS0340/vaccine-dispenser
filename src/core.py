@@ -10,17 +10,18 @@ import time
 from datetime import datetime
 import unicodedata
 import urllib3
-import re
 import platform
-import pyppeteer
 from pyppeteer import launch
-from constants import vaccine_candidates
 
 search_time = 0.5  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
 async def login_request(id, pw):
-    browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=True, options={'args': ['--no-sandbox']})
+    os_type = platform.system()
+    if os_type == "Linux":
+        browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=True, options={'args': ['--no-sandbox']})
+    else:
+        browser = await launch(headless=True)
     page = await browser.newPage()
     url = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
     await page.goto(url)
