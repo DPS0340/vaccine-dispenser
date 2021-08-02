@@ -237,7 +237,8 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                     found = x
                     done = True
                     break
-        except error as err:
+        except Exception as err:
+            logging.critical(err, exc_info=True)
             await message.channel.send("Error : ", err)
             close(message)
 
