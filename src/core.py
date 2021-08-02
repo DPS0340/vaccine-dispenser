@@ -15,7 +15,7 @@ import pyppeteer
 from pyppeteer import launch
 from constants import vaccine_candidates
 
-search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
+search_time = 0.5  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
 async def login_request(id, pw):
@@ -65,6 +65,7 @@ async def check_user_info_loaded(message, cookies):
         await close(message)
         return False
     else:
+        await message.channel.send("사용자 정보 파싱중...")
         user_info = user_info_json.get("user")
         for key in user_info:
             value = user_info[key]
@@ -81,6 +82,7 @@ async def check_user_info_loaded(message, cookies):
                 await message.channel.send("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
                 await close(message, success=None)
                 return False
+        await message.channel.send("사용자 정보 파싱에 실패하였습니다.")
         return False
 
 
