@@ -1,6 +1,16 @@
 version: "3.9"
 services:
+    watchtower:
+        container_name: vaccinebot-watchtower
+        image: containrrr/watchtower
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /etc/docker:/etc/docker
+        command: --interval 30
     vaccinebot:
-        build: ..
+        restart: always
+        image: a891/vaccinebot:latest
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
         environment:
             - VACCINEBOT_TOKEN=${VACCINEBOT_TOKEN}
