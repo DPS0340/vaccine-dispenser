@@ -181,8 +181,8 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
         reservation_url = 'https://vaccine.kakao.com/api/v1/reservation/retry'
     data = {"from": "Map", "vaccineCode": vaccine_type,
             "orgCode": organization_code, "distance": None}
-    session = aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies)
-    response = await session.post(reservation_url, data=json.dumps(data), ssl=False)
+    async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
+        response = await session.post(reservation_url, data=json.dumps(data), ssl=False)
     response_json = json.loads(await response.read())
     for key in response_json:
         value = response_json[key]
@@ -222,9 +222,9 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
     while not done:
         try:
             time.sleep(search_time)
-            session = aiohttp.ClientSession(headers=Headers.headers_map)
-            response = await session.post(url, data=json.dumps(
-                data), ssl=False, timeout=5)
+            async with aiohttp.ClientSession(headers=Headers.headers_map) as session:
+                response = await session.post(url, data=json.dumps(
+                    data), ssl=False, timeout=5)
 
             text = await response.read()
 
@@ -252,9 +252,9 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
 
     if vaccine_type == "ANY":  # ANY 백신 선택
         check_organization_url = f'https://vaccine.kakao.com/api/v2/org/org_code/{organization_code}'
-        session = aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies)
-        check_organization_response = await session.get(check_organization_url, data=json.dumps(
-                data), headers=Headers.headers_vacc, ssl=False, timeout=5)
+        async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
+            check_organization_response = await session.get(check_organization_url, data=json.dumps(
+                    data), headers=Headers.headers_vacc, ssl=False, timeout=5)
         text = await check_organization_response.read()
         check_organization_data = json.loads(text).get("lefts")
         for x in check_organization_data:
