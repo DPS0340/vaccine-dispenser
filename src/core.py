@@ -1,3 +1,4 @@
+import asyncio
 from http import cookies
 from logging import error
 import logging
@@ -238,10 +239,13 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                     found = x
                     done = True
                     break
+        except asyncio.exceptions.TimeoutError as err:
+            continue
         except Exception as err:
             logging.critical(err, exc_info=True)
-            await message.channel.send("Error : ", err)
-            close(message)
+            await message.channel.send("오류 발생!")
+            await message.channel.send(err)
+            await close(message)
 
     if found is None:
         find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y)
