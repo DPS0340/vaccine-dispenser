@@ -38,24 +38,32 @@ async def login_request(id, pw):
     await pw_input.click()
     await pw_input.type(pw)
 
+    stay_signed_in_button = await page.querySelector('#staySignedIn')
+    await stay_signed_in_button.click()
+
     login_button = await page.querySelector('button.btn_g.btn_confirm.submit')
 
     await login_button.click()
     await page.waitForSelector('body')
+
+    lookup_button_selector = 'button.btn.btn_yellow'
+
+    await page.waitForSelector(lookup_button_selector)
+    lookup_button = await page.querySelector(lookup_button_selector)
+    await lookup_button.click()
 
     cookies = await page.cookies()
     return cookies
 
 async def check_user_info_loaded(message, cookies):
     user_info_api = 'https://vaccine.kakao.com/api/v1/user'
-    session = aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies)
-    user_info_response = await session.get(user_info_api, ssl=False)
+    async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
+        user_info_response = await session.get(user_info_api)
     user_info_json = json.loads(await user_info_response.read())
     if user_info_json.get('error'):
         await message.channel.send("사용자 정보를 불러오는데 실패하였습니다.")
-        await message.channel.send("Chrome 브라우저에서 카카오에 제대로 로그인되어있는지 확인해주세요.")
-        await message.channel.send("로그인이 되어 있는데도 안된다면, 카카오톡에 들어가서 잔여백신 알림 신청을 한번 해보세요. 정보제공 동의가 나온다면 동의 후 다시 시도해주세요.")
-        close(message)
+        await close(message)
+        return False
     else:
         user_info = user_info_json.get("user")
         for key in user_info:
@@ -64,13 +72,15 @@ async def check_user_info_loaded(message, cookies):
                 continue
             if key == 'status' and value == "NORMAL":
                 await message.channel.send("사용자 정보를 불러오는데 성공했습니다.")
-                break
+                return True
             elif key == 'status' and value == "UNKNOWN":
                 await message.channel.send("상태를 알 수 없는 사용자입니다. 1339 또는 보건소에 문의해주세요.")
-                close(message)
+                await close(message)
+                return False
             else:
                 await message.channel.send("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
-                close(message, success=None)
+                await close(message, success=None)
+                return False
 
 
 def fill_str_with_space(input_s, max_size=40, fill_char=" "):
@@ -178,21 +188,21 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
             await message.channel.send("잔여백신 접종 신청이 선착순 마감되었습니다.")
             time.sleep(0.08)
         elif key == 'code' and value == "TIMEOUT":
-            print("TIMEOUT, 예약을 재시도합니다.")
+            await message.channel.send("TIMEOUT, 예약을 재시도합니다.")
             try_reservation(organization_code, vaccine_type, retry=True)
         elif key == 'code' and value == "SUCCESS":
-            print("백신접종신청 성공!!!")
+            await message.channel.send("백신접종신청 성공!!!")
             organization_code_success = response_json.get("organization")
-            print(
+            await message.channel.send(
                 f"병원이름: {organization_code_success.get('orgName')}\t" +
                 f"전화번호: {organization_code_success.get('phoneNumber')}\t" +
                 f"주소: {organization_code_success.get('address')}")
-            close(message, success=True)
+            await close(message, success=True)
             return True
         else:
-            print("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
-            print(await response.read())
-            close(message)
+            await message.channel.send("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
+            await message.channel.send(await response.read())
+            await close(message)
             return False
 
 # ===================================== def ===================================== #
@@ -210,7 +220,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             time.sleep(search_time)
             session = aiohttp.ClientSession(headers=Headers.headers_map)
             response = await session.post(url, data=json.dumps(
-                data), verify=False, timeout=5)
+                data), ssl=False, timeout=5)
 
             text = await response.read()
 
@@ -261,6 +271,8 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
 
 async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y):
     cookies = await login_request(id, pw)
-    cookies = [[x['name'], x['value']] for x in cookies]
-    await check_user_info_loaded(message, cookies)
+    cookies = {x['name']: x['value'] for x in cookies}
+    user_available = await check_user_info_loaded(message, cookies)
+    if not user_available:
+        return
     await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y)
