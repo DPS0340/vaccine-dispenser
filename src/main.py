@@ -1,3 +1,4 @@
+import logging
 from discord import Embed
 from core import login_request, reservation
 from discord.ext import commands
@@ -30,7 +31,10 @@ async def reserv(ctx: commands.Context, vac_type):
     vac_type = vac_code[0]
     user_info = user_infos[ctx.author.id]
     locks[ctx.author.id] = True
-    await reservation(message, vac_type, *user_info.values())
+    try:
+        await reservation(message, vac_type, *user_info.values())
+    except Exception as err:
+        logging.critical(err, exc_info=True)
     locks[ctx.author.id] = False
 
 @bot.command()
