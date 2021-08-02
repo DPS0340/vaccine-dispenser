@@ -58,7 +58,7 @@ async def login_request(id, pw):
 async def check_user_info_loaded(message, cookies):
     user_info_api = 'https://vaccine.kakao.com/api/v1/user'
     async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
-        user_info_response = await session.get(user_info_api)
+        user_info_response = await session.get(user_info_api, ssl=False)
     user_info_json = json.loads(await user_info_response.read())
     if user_info_json.get('error'):
         await message.channel.send("사용자 정보를 불러오는데 실패하였습니다.")
@@ -251,7 +251,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
         check_organization_url = f'https://vaccine.kakao.com/api/v2/org/org_code/{organization_code}'
         session = aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies)
         check_organization_response = await session.get(check_organization_url, data=json.dumps(
-                data), headers=Headers.headers_vacc, verify=False, timeout=5)
+                data), headers=Headers.headers_vacc, ssl=False, timeout=5)
         text = await check_organization_response.read()
         check_organization_data = json.loads(text).get("lefts")
         for x in check_organization_data:
