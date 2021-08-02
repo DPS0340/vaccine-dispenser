@@ -1,4 +1,4 @@
-import logging
+from log import logger as logging
 from discord import Embed
 from core import login_request, reservation
 from discord.ext import commands

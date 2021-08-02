@@ -1,14 +1,10 @@
 import asyncio
-from http import cookies
-from logging import error
-import logging
+from log import logger as logging
 import aiohttp
-import configparser
 import json
 import os
 import sys
 import time
-from datetime import datetime
 import unicodedata
 import urllib3
 import platform
@@ -63,6 +59,7 @@ async def check_user_info_loaded(message, cookies):
     async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
         user_info_response = await session.get(user_info_api, ssl=False)
     user_info_json = json.loads(await user_info_response.read())
+    logging.info(user_info_json)
     if user_info_json.get('error'):
         await message.channel.send("사용자 정보를 불러오는데 실패하였습니다.")
         await close(message)
@@ -186,6 +183,7 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
     async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
         response = await session.post(reservation_url, data=json.dumps(data), ssl=False)
     response_json = json.loads(await response.read())
+    logging.info(response_json)
     for key in response_json:
         value = response_json[key]
         if key != 'code':
@@ -227,11 +225,11 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             async with aiohttp.ClientSession(headers=Headers.headers_map) as session:
                 response = await session.post(url, data=json.dumps(
                     data), ssl=False, timeout=5)
+                logging.info(response.status)
 
             text = await response.read()
-
+            logging.info(text)
             json_data = json.loads(text)
-
             logging.info(json_data)
 
             for x in json_data.get("organizations"):
@@ -240,7 +238,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                     done = True
                     break
         except asyncio.exceptions.TimeoutError as err:
-            logging.critical(f"timeout err: {err}", exc_info=True)
+            logging.info(f"timeout err: {err}", exc_info=True)
             continue
         except Exception as err:
             logging.critical(err, exc_info=True)
