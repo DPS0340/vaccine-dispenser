@@ -1,5 +1,6 @@
 from http import cookies
 from logging import error
+import logging
 import aiohttp
 import configparser
 import json
@@ -212,7 +213,7 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y):
-    url = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
+    url = 'https://vaccine-map.kakao.com/api/v3/vaccine/left_count_by_coords'
     data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "onlyLeft": False, "order": "latitude",
             "topLeft": {"x": top_x, "y": top_y}}
     done = False
@@ -228,6 +229,8 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             text = await response.read()
 
             json_data = json.loads(text)
+
+            logging.info(json_data)
 
             for x in json_data.get("organizations"):
                 if x.get('status') == "AVAILABLE" or x.get('leftCounts') != 0:
