@@ -47,8 +47,7 @@ async def list(ctx: commands.Context):
         embed.add_field(name=vaccine['name'], value=vaccine['name'], inline=False)
     await message.channel.send(embed=embed)
 
-async def help(ctx: commands.Context):
-    message = ctx.message
+async def help(message):
     embed = Embed(title="백신봇 도움말", color=0x95e4fe)
     embed.add_field(name=f"{prefix} list", value="백신 목록", inline=False)
     embed.add_field(name=f"{prefix} login id pw top_x top_y bottom_x bottom_y", value="로그인, 좌표값은 https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/2 참고", inline=False)
@@ -70,7 +69,7 @@ async def on_message(message):
         return
     mention = f"<@!{bot.user.id}>"
     if mention in message.content:
-        await help(message.content)
+        await help(message)
         pass
     if not message.content.startswith(prefix):
         return
