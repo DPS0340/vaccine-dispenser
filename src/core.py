@@ -81,6 +81,7 @@ async def check_user_info_loaded(message, cookies):
                 await message.channel.send("이미 접종이 완료되었거나 예약이 완료된 사용자입니다.")
                 await close(message, success=None)
                 return False
+        return False
 
 
 def fill_str_with_space(input_s, max_size=40, fill_char=" "):
