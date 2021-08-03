@@ -194,7 +194,7 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
             time.sleep(0.08)
         elif key == 'code' and value == "TIMEOUT":
             await message.channel.send("TIMEOUT, 예약을 재시도합니다.")
-            try_reservation(message, cookies, organization_code, vaccine_type, retry=True)
+            return await try_reservation(message, cookies, organization_code, vaccine_type, retry=True)
         elif key == 'code' and value == "SUCCESS":
             await message.channel.send("백신접종신청 성공!!!")
             organization_code_success = response_json.get("organization")
@@ -278,7 +278,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
         await message.channel.send(f"{vaccine_found_code} 으로 예약을 시도합니다.")
 
     if vaccine_found_code:
-        result = try_reservation(message, cookies, organization_code, vaccine_found_code)
+        result = await try_reservation(message, cookies, organization_code, vaccine_found_code)
         return result
     else:
         return False
