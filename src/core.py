@@ -228,7 +228,6 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                 logging.info(response.status)
 
             text = await response.read()
-            logging.info(text)
             json_data = json.loads(text)
             logging.info(json_data)
 
@@ -247,7 +246,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             await close(message)
 
     if found is None:
-        find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y)
+        return False
     await message.channel.send(f"{found.get('orgName')} 에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
     await message.channel.send(f"주소는 : {found.get('address')} 입니다.")
     organization_code = found.get('orgCode')
@@ -276,9 +275,9 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
         await message.channel.send(f"{vaccine_found_code} 으로 예약을 시도합니다.")
 
     if vaccine_found_code and try_reservation(cookies, organization_code, vaccine_found_code):
-        return
+        return True
     else:
-        find_vaccine(vaccine_type, top_x, top_y, bottom_x, bottom_y)
+        return False
 
 async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y):
     cookies = await login_request(id, pw)
@@ -286,4 +285,6 @@ async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bot
     user_available = await check_user_info_loaded(message, cookies)
     if not user_available:
         return
-    await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y)
+    find_result = False
+    while not find_result:
+        find_result = await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y)
