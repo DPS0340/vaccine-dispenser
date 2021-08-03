@@ -194,7 +194,7 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
             time.sleep(0.08)
         elif key == 'code' and value == "TIMEOUT":
             await message.channel.send("TIMEOUT, 예약을 재시도합니다.")
-            try_reservation(organization_code, vaccine_type, retry=True)
+            try_reservation(message, cookies, organization_code, vaccine_type, retry=True)
         elif key == 'code' and value == "SUCCESS":
             await message.channel.send("백신접종신청 성공!!!")
             organization_code_success = response_json.get("organization")
