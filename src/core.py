@@ -278,7 +278,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
         await message.channel.send(f"{vaccine_found_code} 으로 예약을 시도합니다.")
 
     if vaccine_found_code:
-        result = try_reservation(cookies, organization_code, vaccine_found_code)
+        result = try_reservation(message, cookies, organization_code, vaccine_found_code)
         return result
     else:
         return False
