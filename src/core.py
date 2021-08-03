@@ -176,9 +176,9 @@ class Headers:
 
 
 async def try_reservation(message, cookies, organization_code, vaccine_type, retry=False):
-    reservation_url = 'https://vaccine.kakao.com/api/v1/reservation'
+    reservation_url = 'https://vaccine.kakao.com/api/v2/reservation'
     if retry:
-        reservation_url = 'https://vaccine.kakao.com/api/v1/reservation/retry'
+        reservation_url = 'https://vaccine.kakao.com/api/v2/reservation/retry'
     data = {"from": "Map", "vaccineCode": vaccine_type,
             "orgCode": organization_code, "distance": None}
     async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
@@ -213,9 +213,9 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
 # ===================================== def ===================================== #
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y):
-    url = 'https://vaccine-map.kakao.com/api/v2/vaccine/left_count_by_coords'
-    data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "onlyLeft": False, "order": "latitude",
+async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left):
+    url = 'https://vaccine-map.kakao.com/api/v3/vaccine/left_count_by_coords'
+    data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "onlyLeft": only_left, "order": "latitude",
             "topLeft": {"x": top_x, "y": top_y}}
     done = False
     found = None
@@ -256,7 +256,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
     vaccine_found_code = None
 
     if vaccine_type == "ANY":  # ANY 백신 선택
-        check_organization_url = f'https://vaccine.kakao.com/api/v2/org/org_code/{organization_code}'
+        check_organization_url = f'https://vaccine.kakao.com/api/v3/org/org_code/{organization_code}'
         async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
             check_organization_response = await session.get(check_organization_url, data=json.dumps(
                     data), headers=Headers.headers_vacc, ssl=False, timeout=5)
@@ -275,12 +275,13 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
         vaccine_found_code = vaccine_type
         await message.channel.send(f"{vaccine_found_code} 으로 예약을 시도합니다.")
 
-    if vaccine_found_code and try_reservation(cookies, organization_code, vaccine_found_code):
-        return True
+    if vaccine_found_code:
+        result = try_reservation(cookies, organization_code, vaccine_found_code)
+        return result
     else:
         return False
 
-async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y):
+async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y, only_left):
     cookies = await login_request(id, pw)
     cookies = {x['name']: x['value'] for x in cookies}
     user_available = await check_user_info_loaded(message, cookies)
@@ -288,4 +289,4 @@ async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bot
         return
     find_result = False
     while not find_result:
-        find_result = await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y)
+        find_result = await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left)

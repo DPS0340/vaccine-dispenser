@@ -14,9 +14,9 @@ user_infos = {}
 locks = {}
 
 @bot.command()
-async def login(ctx: commands.Context, id, pw, top_x, top_y, bottom_x, bottom_y):
+async def login(ctx: commands.Context, id, pw, top_x, top_y, bottom_x, bottom_y, only_left=True):
     message = ctx.message
-    user_infos[ctx.author.id] = {'id': id, 'pw': pw, 'top_x': top_x, 'top_y': top_y, 'bottom_x': bottom_x, 'bottom_y': bottom_y}
+    user_infos[ctx.author.id] = {'id': id, 'pw': pw, 'top_x': top_x, 'top_y': top_y, 'bottom_x': bottom_x, 'bottom_y': bottom_y, 'only_left': only_left}
     await message.channel.send("로그인이 완료되었습니다!")
 
 @bot.command()
@@ -50,7 +50,7 @@ async def list(ctx: commands.Context):
 async def help(message):
     embed = Embed(title="백신봇 도움말", color=0x95e4fe)
     embed.add_field(name=f"{prefix}list", value="백신 목록", inline=False)
-    embed.add_field(name=f"{prefix}login id pw top_x top_y bottom_x bottom_y", value="카카오 로그인, 좌표값은 https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/2 참고", inline=False)
+    embed.add_field(name=f"{prefix}login id pw top_x top_y bottom_x bottom_y only_left", value="카카오 로그인, 좌표값은 https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro/discussions/2 참고", inline=False)
     embed.add_field(name=f"{prefix}reserv vac_type", value="백신 예약", inline=False)
     embed.add_field(
         name=f"License", value="MIT License, Forked from https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro", inline=False)
