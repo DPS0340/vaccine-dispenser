@@ -220,6 +220,8 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
     done = False
     found = None
 
+    await message.channel.send(f"백신을 {search_time}초 주기로 찾는 중입니다..")
+
     while not done:
         try:
             time.sleep(search_time)
