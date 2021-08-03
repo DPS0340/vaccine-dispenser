@@ -22,8 +22,12 @@ async def login(ctx: commands.Context, id: str, pw: str, top_x: float, top_y: fl
 @bot.command()
 async def reserv(ctx: commands.Context, vac_type: str):
     message = ctx.message
+    if user_infos.get(ctx.author.id) is None:
+        await message.channel.send("먼저 로그인을 해주세요!")
+        return
     if locks.get(ctx.author.id) == True:
         await message.channel.send("이미 예약중입니다!")
+        return
     vac_code = [ x['code'] for x in vaccine_candidates if x['name'] == vac_type]
     if not vac_code:
         await message.channel.send("잘못된 백신 인자값입니다.")
