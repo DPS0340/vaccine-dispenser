@@ -14,13 +14,13 @@ user_infos = {}
 locks = {}
 
 @bot.command()
-async def login(ctx: commands.Context, id, pw, top_x, top_y, bottom_x, bottom_y, only_left=True):
+async def login(ctx: commands.Context, id: str, pw: str, top_x: float, top_y: float, bottom_x: float, bottom_y: float, only_left: bool = True):
     message = ctx.message
     user_infos[ctx.author.id] = {'id': id, 'pw': pw, 'top_x': top_x, 'top_y': top_y, 'bottom_x': bottom_x, 'bottom_y': bottom_y, 'only_left': only_left}
     await message.channel.send("로그인이 완료되었습니다!")
 
 @bot.command()
-async def reserv(ctx: commands.Context, vac_type):
+async def reserv(ctx: commands.Context, vac_type: str):
     message = ctx.message
     if locks.get(ctx.author.id) == True:
         await message.channel.send("이미 예약중입니다!")
