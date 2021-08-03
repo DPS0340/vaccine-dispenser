@@ -11,7 +11,7 @@ import urllib3
 import platform
 from pyppeteer import launch
 
-search_time = 0.5  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
+search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
 async def login_request(id, pw):
