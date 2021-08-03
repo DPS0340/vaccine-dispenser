@@ -1,5 +1,6 @@
 import asyncio
 from log import logger as logging
+from datetime import datetime
 import aiohttp
 import json
 import os
@@ -183,7 +184,8 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
     async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
         response = await session.post(reservation_url, data=json.dumps(data), ssl=False)
     response_json = json.loads(await response.read())
-    logging.info(response_json)
+    current_time = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+    logging.info(f"{current_time}: {response_json}")
     for key in response_json:
         value = response_json[key]
         if key != 'code':
