@@ -9,7 +9,7 @@ import unicodedata
 import urllib3
 import platform
 from pyppeteer import launch
-from constants import Headers, cookies_map
+from constants import Headers, cookies_map, webserver_port
 
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
@@ -89,7 +89,7 @@ async def login_proxy_request(bot, message):
         logging.info("Timeout")
         return
 
-    url = 'http://vaccinebot.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
+    url = f'http://vaccinebot.kakao.com:{webserver_port}/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
     await message.channel.send(f"{url}로 로그인하시면 백신봇 로그인이 완료됩니다!")
     while not cookies_map.get(ip):
         continue
