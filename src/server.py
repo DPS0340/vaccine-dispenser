@@ -17,13 +17,13 @@ class Webserver(commands.Cog):
         self.webserver_port = webserver_port
         self.sessions = {}
         app.router.add_routes([
-            web.get('', self.arca_proxy),
-            web.post('', self.arca_proxy),
-            web.get('/{url:.*}', self.arca_proxy),
-            web.post('/{url:.*}', self.arca_proxy)])
+            web.get('', self.kakao_proxy),
+            web.post('', self.kakao_proxy),
+            web.get('/{url:.*}', self.kakao_proxy),
+            web.post('/{url:.*}', self.kakao_proxy)])
         self.web_server.start()
 
-    async def arca_proxy(self, request: web.Request):
+    async def kakao_proxy(self, request: web.Request):
         url = request.path_qs
         headers = request.headers.copy()
 
