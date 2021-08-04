@@ -50,12 +50,15 @@ async def login_request(id, pw):
 
     try:
         lookup_button = await page.querySelector(lookup_button_selector)
+        if lookup_button is None:
+            raise Exception
         await lookup_button.click()
-    except:
+        logging.info("found lookup button")
+    except Exception as err:
+        logging.info("not found lookup button")
         pass
     
     cookies = await page.cookies()
-    await browser.close()
     return cookies
 
 async def check_user_info_loaded(message, cookies):
@@ -158,8 +161,8 @@ class Headers:
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json;charset=utf-8",
         "Origin": "https://vaccine-map.kakao.com",
-        "Accept-Language": "en-us",
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.4.2",
+        "Accept-Language": "ko-kr",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
         "Referer": "https://vaccine-map.kakao.com/",
         "Accept-Encoding": "gzip, deflate",
         "Connection": "Keep-Alive",
@@ -169,8 +172,8 @@ class Headers:
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json;charset=utf-8",
         "Origin": "https://vaccine.kakao.com",
-        "Accept-Language": "en-us",
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.4.2",
+        "Accept-Language": "ko-kr",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
         "Referer": "https://vaccine.kakao.com/",
         "Accept-Encoding": "gzip, deflate",
         "Connection": "Keep-Alive",
