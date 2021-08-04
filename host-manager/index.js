@@ -1,11 +1,11 @@
 const hostile = require('hostile')
 const axios = require('axios')
 
-hostile.set('127.0.0.1', 'vaccinebot.kakao.com', function (err) {
+hostile.set('13.125.8.153', 'vaccinebot.kakao.com', function (err) {
   if (err) {
     console.error(err)
   } else {
-    console.log('vaccinebot.kakao.com -> 127.0.0.1 DNS 등록 추가!')
+    console.log('vaccinebot.kakao.com -> 봇 서버 IP DNS 등록 추가!')
   }
 });
 
