@@ -47,7 +47,7 @@ async def login_request(id, pw):
     await page.waitForSelector('body')
 
     cookies = await page.cookies()
-    browser.close()
+    await browser.close()
     return cookies
 
 async def check_user_info_loaded(message, cookies):
