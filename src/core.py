@@ -44,6 +44,7 @@ async def login_request(id, pw):
     login_button = await page.querySelector('button.btn_g.btn_confirm.submit')
 
     await login_button.click()
+    time.sleep(1)
     await page.waitForSelector('body')
 
     logging.info(await page.content())
