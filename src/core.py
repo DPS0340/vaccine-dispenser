@@ -53,6 +53,7 @@ async def login_request(id, pw):
     await lookup_button.click()
 
     cookies = await page.cookies()
+    browser.close()
     return cookies
 
 async def check_user_info_loaded(message, cookies):
