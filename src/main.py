@@ -3,7 +3,7 @@ from discord import Embed
 from core import login_request, reservation
 from discord.ext import commands
 from vaccinebot_token import get_token
-from core import fill_str_with_space
+from server import Webserver
 from constants import vaccine_candidates
 
 prefix = "vac "
@@ -36,7 +36,7 @@ async def reserv(ctx: commands.Context, vac_type: str):
     user_info = user_infos[ctx.author.id]
     locks[ctx.author.id] = True
     try:
-        await reservation(message, vac_type, *user_info.values())
+        await reservation(bot, message, vac_type, *user_info.values())
     except Exception as err:
         logging.critical(err, exc_info=True)
     locks[ctx.author.id] = False
@@ -84,4 +84,5 @@ async def on_message(message):
     await bot.process_commands(message)
 
 if __name__ == '__main__':
+    bot.add_cog(Webserver(bot))
     bot.run(token)

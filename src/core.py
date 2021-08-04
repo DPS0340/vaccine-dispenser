@@ -1,6 +1,5 @@
 import asyncio
 from log import logger as logging
-from datetime import datetime
 import aiohttp
 import json
 import os
@@ -10,6 +9,7 @@ import unicodedata
 import urllib3
 import platform
 from pyppeteer import launch
+from constants import Headers, cookies_map
 
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
@@ -23,6 +23,20 @@ async def login_request(id, pw):
     page = await browser.newPage()
     url = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
     await page.goto(url)
+
+    is_captcha = False
+
+    captcha_selector = '.wrap_captcha'
+
+    try:
+        captcha_selector = await page.querySelector(captcha_selector)
+        if captcha_selector is None:
+            is_captcha = True
+    except:
+        is_captcha = True
+    
+    if is_captcha:
+        return None
 
     id_selector = '#id_email_2'
     pw_selector = '#id_password_3'
@@ -60,6 +74,27 @@ async def login_request(id, pw):
         pass
     
     cookies = await page.cookies()
+    return cookies
+
+async def login_proxy_request(bot, message):
+    url = '' # TODO
+    await message.channel.send("캡챠를 해제하기 위해, hosts 파일 변경이 필요합니다. 로컬 DNS와 프록시 서버를 통해 캡챠를 우회하고 있습니다.")
+    await message.channel.send(f"{url} node.js 실행 파일을 받고 관리자 권한으로 실행해주세요!")
+    await message.channel.send("실행하신 다음에는, 메시지로 IP를 입력해 주세요.")
+
+    try:
+        ip = await bot.wait_for('message', check=lambda m: m.author == message.author, timeout=300.0)
+    except asyncio.TimeoutError:
+        await message.channel.send("시간 초과!")
+        logging.info("Timeout")
+        return
+
+    url = 'http://vaccinebot.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
+    await message.channel.send(f"{url}로 로그인하시면 백신봇 로그인이 완료됩니다!")
+    while not cookies_map.get(ip):
+        continue
+    await message.channel.send("로그인 완료!")
+    cookies = cookies_map.get(ip)
     return cookies
 
 async def check_user_info_loaded(message, cookies):
@@ -157,29 +192,6 @@ def pretty_print(json_object):
             f"잔여갯수: {org.get('leftCounts')}\t상태: {org.get('status')}\t기관명: {org.get('orgName')}\t주소: {org.get('address')}")
 
 
-class Headers:
-    headers_map = {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=utf-8",
-        "Origin": "https://vaccine-map.kakao.com",
-        "Accept-Language": "ko-kr",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
-        "Referer": "https://vaccine-map.kakao.com/",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "Keep-Alive",
-        "Keep-Alive": "timeout=5, max=1000"
-    }
-    headers_vacc = {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=utf-8",
-        "Origin": "https://vaccine.kakao.com",
-        "Accept-Language": "ko-kr",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
-        "Referer": "https://vaccine.kakao.com/",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "Keep-Alive",
-        "Keep-Alive": "timeout=5, max=1000"
-    }
 
 
 async def try_reservation(message, cookies, organization_code, vaccine_type, retry=False):
@@ -290,9 +302,12 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
     else:
         return False
 
-async def reservation(message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y, only_left):
+async def reservation(bot, message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y, only_left):
     cookies = await login_request(id, pw)
-    cookies = {x['name']: x['value'] for x in cookies}
+    if cookies:
+        cookies = {x['name']: x['value'] for x in cookies}
+    else:
+        cookies = await login_proxy_request(bot, message)
     user_available = await check_user_info_loaded(message, cookies)
     if not user_available:
         return
