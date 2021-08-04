@@ -94,7 +94,8 @@ async def login_proxy_request(bot, message):
     while not cookies_map.get(ip):
         continue
     await message.channel.send("로그인 완료!")
-    cookies = cookies_map.get(ip)
+    cookies = cookies_map[ip]
+    del cookies_map[ip]
     return cookies
 
 async def check_user_info_loaded(message, cookies):
