@@ -46,12 +46,6 @@ async def login_request(id, pw):
     await login_button.click()
     await page.waitForSelector('body')
 
-    lookup_button_selector = 'button.btn.btn_yellow'
-
-    await page.waitForSelector(lookup_button_selector)
-    lookup_button = await page.querySelector(lookup_button_selector)
-    await lookup_button.click()
-
     cookies = await page.cookies()
     browser.close()
     return cookies
