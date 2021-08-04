@@ -46,6 +46,8 @@ async def login_request(id, pw):
     await login_button.click()
     await page.waitForSelector('body')
 
+    logging.info(await page.content())
+
     lookup_button_selector = 'button.btn.btn_yellow'
 
     try:
