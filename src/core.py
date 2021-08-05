@@ -152,8 +152,8 @@ async def login_proxy_request(bot, message):
     await message.channel.send("실행하신 다음에는, 메시지로 IP를 입력해 주세요.")
 
     try:
-        message = await bot.wait_for('message', check=lambda m: m.author == message.author, timeout=300.0)
-        ip = message.content
+        new_message = await bot.wait_for('message', check=lambda m: m.author == message.author and m.channel == message.channel, timeout=300.0)
+        ip = new_message.content
     except asyncio.TimeoutError:
         await message.channel.send("시간 초과!")
         logging.info("Timeout")
