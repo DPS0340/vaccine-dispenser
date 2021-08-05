@@ -382,6 +382,8 @@ async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
         top_x, top_y, bottom_x, bottom_y = await find_position(browser, page, address, zoom_level)
     else:
         top_x, top_y, bottom_x, bottom_y, only_left = kwargs.values()
+    browser.close()
+    del browser
     user_available = await check_user_info_loaded(message, cookies)
     if not user_available:
         return
