@@ -17,9 +17,9 @@ urllib3.disable_warnings()
 async def login_request(id, pw):
     os_type = platform.system()
     if os_type == "Linux":
-        browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=False, options={'args': ['--no-sandbox']})
+        browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=False, options={'args': ['--no-sandbox', '--headless']})
     else:
-        browser = await launch(headless=False)
+        browser = await launch(headless=False, options={'args': ['--headless']})
     page = await browser.newPage()
     url = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
     await page.goto(url)
