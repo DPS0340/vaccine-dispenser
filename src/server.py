@@ -1,11 +1,13 @@
-# from https://github.com/DPS0340/CleanerBot/blob/master/src/server.py
+# original code from https://github.com/DPS0340/CleanerBot/blob/master/src/server.py
 
 from aiohttp import web
-from constants import webserver_port, cookies_map
+from multidict import MultiDict
+from constants import webserver_port, cookies_map, temp_cookies_map
 from discord.ext import commands, tasks
 import aiohttp
 from log import logger
 from constants import Headers
+from http.cookies import SimpleCookie
 
 header = Headers.UA
 
@@ -39,9 +41,6 @@ class Webserver(commands.Cog):
         else:
             session = aiohttp.ClientSession(headers=request_header)
             self.sessions[request.remote] = session
-        
-        if 'weblogin/sso_initialize' in url:
-            cookies_map[request.remote] = request.cookies()
             
         http_method = session.post if request.method == 'POST' else session.get
 
@@ -52,7 +51,32 @@ class Webserver(commands.Cog):
             req = await http_method(remote_url, ssl=False)
         body = await req.read()
         text = body.decode('utf-8')
-        return web.Response(text=text, status=req.status, content_type=req.content_type)
+        headers = MultiDict(req.headers.copy())
+        new_headers = MultiDict()
+
+        for (k, v) in headers.items():
+            if k != 'Set-Cookie':
+                continue
+            new_headers.add(k, v)
+        
+        headers = new_headers
+
+        req_cookies = SimpleCookie()
+        for cookie in list(headers.values()):
+            # 여러개의 쿠키 키-밸류 쌍에 일반화 필요
+            # 더 좋은 방법이 있을지...?
+            cookie = cookie.split(";")[0]
+            req_cookies.load(cookie)
+            if temp_cookies_map.get(request.remote) is None:
+                temp_cookies_map[request.remote] = {}
+            temp_cookies_map[request.remote] = {**temp_cookies_map[request.remote], **dict(req_cookies.copy())}
+        
+        if 'weblogin/sso_initialize' in url:
+            cookies_map[request.remote] = temp_cookies_map[request.remote]
+            del temp_cookies_map[request.remote]
+
+        response = web.Response(text=text, status=req.status, headers=headers, content_type=req.content_type)
+        return response
 
     @tasks.loop()
     async def web_server(self):
@@ -60,6 +84,7 @@ class Webserver(commands.Cog):
         await runner.setup()
         site = web.TCPSite(runner, host='0.0.0.0', port=self.webserver_port)
         await site.start()
+        
 
     @web_server.before_loop
     async def web_server_before_loop(self):

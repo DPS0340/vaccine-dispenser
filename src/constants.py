@@ -39,6 +39,7 @@ class Headers:
     }
 
 cookies_map = {}
+temp_cookies_map = {}
 
 def get_ip_address():
     import requests

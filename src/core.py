@@ -1,5 +1,6 @@
 import asyncio
 from log import logger as logging
+import concurrent
 import aiohttp
 import json
 import os
@@ -83,19 +84,31 @@ async def login_proxy_request(bot, message):
     await message.channel.send("실행하신 다음에는, 메시지로 IP를 입력해 주세요.")
 
     try:
-        ip = await bot.wait_for('message', check=lambda m: m.author == message.author, timeout=300.0)
+        message = await bot.wait_for('message', check=lambda m: m.author == message.author, timeout=300.0)
+        ip = message.content
     except asyncio.TimeoutError:
         await message.channel.send("시간 초과!")
         logging.info("Timeout")
         return
 
     url = f'http://vaccinebot.kakao.com:{webserver_port}/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
-    await message.channel.send(f"{url}로 로그인하시면 백신봇 로그인이 완료됩니다!")
-    while not cookies_map.get(ip):
-        continue
+    await message.channel.send(f"{url} 로 로그인하시면 백신봇 로그인이 완료됩니다! **꼭 로그인 유지를 체크해주세요.**")
+
+    def wait_for_cookies():
+        while cookies_map.get(ip) is None:
+            continue
+        cookies = cookies_map[ip]
+        del cookies_map[ip]
+        return cookies
+    
+    async def async_wrapper(callback):
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, callback)
+
+    cookies = await async_wrapper(wait_for_cookies)
+
     await message.channel.send("로그인 완료!")
-    cookies = cookies_map[ip]
-    del cookies_map[ip]
+
     return cookies
 
 async def check_user_info_loaded(message, cookies):
