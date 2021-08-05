@@ -11,5 +11,7 @@ websockets < 10.0
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\core.py: 12
 git+git://github.com/DPS0340/pyppeteer@dev#egg=pyppeteer
 
+requests
+
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\core.py: 9
 urllib3 == 1.26.6
