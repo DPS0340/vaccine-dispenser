@@ -87,6 +87,7 @@ async def find_position(browser: browser_module.Browser, page: page_module.Page,
     await page.waitForSelector(search_form_selector)
     search_form = await page.querySelector(search_form_selector)
     await search_form.click()
+    
     await search_form.type(address)
     await page.keyboard.press('Enter')
 
@@ -104,11 +105,18 @@ async def find_position(browser: browser_module.Browser, page: page_module.Page,
     top_x, top_y, bottom_x, bottom_y = None, None, None, None
     find_count = 0
 
+    deltaY = 200
+    if zoom_level >= 0:
+        deltaY *= -1
+        zoom_level = min(zoom_level, 2)
+    zoom_level = abs(zoom_level)
+
     def wait_for_request():
         while find_count < zoom_level:
             continue
         
     async def intercept_network_request(request: network_manager.Request):
+        await request.continue_()
         if 'left_count_by_coords' in request.url:
             nonlocal find_count, top_x, top_y, bottom_x, bottom_y
             find_count += 1
@@ -117,20 +125,17 @@ async def find_position(browser: browser_module.Browser, page: page_module.Page,
             topLeft = data.get('topLeft')
             top_x, top_y = topLeft.get('x'), topLeft.get('y')
             bottom_x, bottom_y = bottomRight.get('x'), bottomRight.get('y')
-        await request.continue_()
+            if find_count < zoom_level:
+                # Simple Recursion
+                nonlocal map, page
+                await map.click({'button': 'middle'})
+                await page.mouse.wheel({'deltaY': deltaY})
 
     await page.setRequestInterception(True)
     page.on('request', lambda request: asyncio.ensure_future(intercept_network_request(request)))
-    
-    deltaY = 200
-    if zoom_level >= 0:
-        deltaY *= -1
-        zoom_level = min(zoom_level, 2)
-    zoom_level = abs(zoom_level)
 
-    for _ in range(zoom_level):
-        await map.click({'button': 'middle'})
-        await page.mouse.wheel({'deltaY': deltaY})
+    await map.click({'button': 'middle'})
+    await page.mouse.wheel({'deltaY': deltaY})
 
     await async_wrapper(wait_for_request)
 
