@@ -21,20 +21,6 @@ async def login_request(id, pw):
 
     await page.goto(url)
 
-    is_captcha = False
-
-    captcha_selector = '.wrap_captcha'
-
-    try:
-        captcha_selector = await page.querySelector(captcha_selector)
-        if captcha_selector is None:
-            is_captcha = True
-    except:
-        is_captcha = True
-    
-    if is_captcha:
-        return None
-
     id_selector = '#id_email_2'
     pw_selector = '#id_password_3'
 
@@ -55,8 +41,22 @@ async def login_request(id, pw):
     login_button = await page.querySelector('button.btn_g.btn_confirm.submit')
 
     await login_button.click()
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await page.waitForSelector('body')
+    
+    is_captcha = False
+
+    captcha_selector = '.wrap_captcha'
+
+    try:
+        captcha_selector = await page.querySelector(captcha_selector)
+        if captcha_selector is not None:
+            is_captcha = True
+    except:
+        is_captcha = True
+    
+    if is_captcha:
+        return None, None, None
 
     lookup_button_selector = 'button.btn.btn_yellow'
 
