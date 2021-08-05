@@ -15,7 +15,7 @@ search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니�
 urllib3.disable_warnings()
 
 async def login_request(id, pw):
-    browser = await launch(headless=True, options={'args': ['--no-sandbox']})
+    browser = await launch(headless=True, options={'args': ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']})
     page = await browser.newPage()
     url = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
 
