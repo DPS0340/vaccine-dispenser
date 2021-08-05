@@ -6,8 +6,10 @@ aiohttp == 3.7.4.post0
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\main.py: 1
 discord.py == 1.7.3
 
+websockets < 10.0
+
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\core.py: 12
-pyppeteer == 0.2.5
+git+git://github.com/DPS0340/pyppeteer@dev#egg=pyppeteer
 
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\core.py: 9
 urllib3 == 1.26.6
