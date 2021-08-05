@@ -1,16 +1,15 @@
 import asyncio
 from log import logger as logging
-import concurrent
 import aiohttp
 import json
 import os
 import sys
-import time
 import unicodedata
 import urllib3
 import platform
-from pyppeteer import launch
+from pyppeteer import browser as browser_module, launch, page as page_module, network_manager
 from constants import Headers, cookies_map, webserver_port
+from utils import async_wrapper
 
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
@@ -18,9 +17,9 @@ urllib3.disable_warnings()
 async def login_request(id, pw):
     os_type = platform.system()
     if os_type == "Linux":
-        browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=True, options={'args': ['--no-sandbox']})
+        browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=False, options={'args': ['--no-sandbox']})
     else:
-        browser = await launch(headless=True)
+        browser = await launch(headless=False)
     page = await browser.newPage()
     url = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
     await page.goto(url)
@@ -59,7 +58,7 @@ async def login_request(id, pw):
     login_button = await page.querySelector('button.btn_g.btn_confirm.submit')
 
     await login_button.click()
-    time.sleep(1)
+    await asyncio.sleep(1)
     await page.waitForSelector('body')
 
     lookup_button_selector = 'button.btn.btn_yellow'
@@ -75,7 +74,67 @@ async def login_request(id, pw):
         pass
     
     cookies = await page.cookies()
-    return cookies
+    return cookies, browser, page
+
+async def find_position(browser: browser_module.Browser, page: page_module.Page, address: str, zoom_level: int):
+    finder_selector = '.btn_util.btn_search'
+
+    await page.waitForSelector(finder_selector)
+    finder = await page.querySelector(finder_selector)
+    await finder.click()
+
+    search_form_selector = '#searchKeyword'
+    await page.waitForSelector(search_form_selector)
+    search_form = await page.querySelector(search_form_selector)
+    await search_form.click()
+    await search_form.type(address)
+    await page.keyboard.press('Enter')
+
+    result_link_selector = '.link_search'
+    await page.waitForSelector(result_link_selector)
+    result_link = await page.querySelector(result_link_selector)
+    await result_link.click()
+
+    await asyncio.sleep(1)
+
+    map_selector = '#map'
+
+    map = await page.querySelector(map_selector)
+
+    top_x, top_y, bottom_x, bottom_y = None, None, None, None
+    find_count = 0
+
+    def wait_for_request():
+        while find_count < zoom_level:
+            continue
+        
+    async def intercept_network_request(request: network_manager.Request):
+        if 'left_count_by_coords' in request.url:
+            nonlocal find_count, top_x, top_y, bottom_x, bottom_y
+            find_count += 1
+            data: dict = json.loads(request.postData)
+            bottomRight = data.get('bottomRight')
+            topLeft = data.get('topLeft')
+            top_x, top_y = topLeft.get('x'), topLeft.get('y')
+            bottom_x, bottom_y = bottomRight.get('x'), bottomRight.get('y')
+        await request.continue_()
+
+    await page.setRequestInterception(True)
+    page.on('request', lambda request: asyncio.ensure_future(intercept_network_request(request)))
+    
+    deltaY = 200
+    if zoom_level >= 0:
+        deltaY *= -1
+        zoom_level = min(zoom_level, 2)
+    zoom_level = abs(zoom_level)
+
+    for _ in range(zoom_level):
+        await map.click({'button': 'middle'})
+        await page.mouse.wheel({'deltaY': deltaY})
+
+    await async_wrapper(wait_for_request)
+
+    return top_x, top_y, bottom_x, bottom_y
 
 async def login_proxy_request(bot, message):
     url = '' # TODO
@@ -100,10 +159,6 @@ async def login_proxy_request(bot, message):
         cookies = cookies_map[ip]
         del cookies_map[ip]
         return cookies
-    
-    async def async_wrapper(callback):
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, callback)
 
     cookies = await async_wrapper(wait_for_cookies)
 
@@ -224,7 +279,7 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, ret
             continue
         if key == 'code' and value == "NO_VACANCY":
             await message.channel.send("잔여백신 접종 신청이 선착순 마감되었습니다.")
-            time.sleep(0.08)
+            await asyncio.sleep(0.08)
         elif key == 'code' and value == "TIMEOUT":
             await message.channel.send("TIMEOUT, 예약을 재시도합니다.")
             return await try_reservation(message, cookies, organization_code, vaccine_type, retry=True)
@@ -257,7 +312,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
 
     while not done:
         try:
-            time.sleep(search_time)
+            await asyncio.sleep(search_time)
             async with aiohttp.ClientSession(headers=Headers.headers_map) as session:
                 response = await session.post(url, data=json.dumps(
                     data), ssl=False, timeout=5)
@@ -316,12 +371,17 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
     else:
         return False
 
-async def reservation(bot, message, vaccine_type, id, pw, top_x, top_y, bottom_x, bottom_y, only_left):
-    cookies = await login_request(id, pw)
+async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
+    cookies, browser, page = await login_request(id, pw)
     if cookies:
         cookies = {x['name']: x['value'] for x in cookies}
     else:
         cookies = await login_proxy_request(bot, message)
+    if kwargs.get('address') is not None:
+        address, zoom_level, only_left = kwargs.values()
+        top_x, top_y, bottom_x, bottom_y = await find_position(browser, page, address, zoom_level)
+    else:
+        top_x, top_y, bottom_x, bottom_y, only_left = kwargs.values()
     user_available = await check_user_info_loaded(message, cookies)
     if not user_available:
         return
