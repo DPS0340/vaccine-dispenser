@@ -76,7 +76,7 @@ async def login_request(id, pw):
     cookies = await page.cookies()
     return cookies, browser, page
 
-async def find_position(browser: browser_module.Browser, page: page_module.Page, address: str, zoom_level: int):
+async def find_position(message, page: page_module.Page, address: str, zoom_level: int):
     finder_selector = '.btn_util.btn_search'
 
     await page.waitForSelector(finder_selector)
@@ -92,8 +92,14 @@ async def find_position(browser: browser_module.Browser, page: page_module.Page,
     await page.keyboard.press('Enter')
 
     result_link_selector = '.link_search'
-    await page.waitForSelector(result_link_selector)
+    try:
+        await page.waitForSelector(result_link_selector, timeout=1000)
+    except:
+        await message.channel.send("주소를 찾지 못했습니다!")
+        return None, None, None, None
+
     result_link = await page.querySelector(result_link_selector)
+
     await result_link.click()
 
     await asyncio.sleep(1)
@@ -385,11 +391,16 @@ async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
         cookies = await login_proxy_request(bot, message)
     if kwargs.get('address') is not None:
         address, zoom_level, only_left = kwargs.values()
-        top_x, top_y, bottom_x, bottom_y = await find_position(browser, page, address, zoom_level)
+        top_x, top_y, bottom_x, bottom_y = await find_position(message, page, address, zoom_level)
     else:
         top_x, top_y, bottom_x, bottom_y, only_left = kwargs.values()
-    browser.close()
+
+    await browser.close()
     del browser
+
+    if None in [top_x, top_y, bottom_x, bottom_y]:
+        return
+
     user_available = await check_user_info_loaded(message, cookies)
     if not user_available:
         return
