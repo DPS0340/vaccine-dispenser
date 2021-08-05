@@ -15,13 +15,10 @@ search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니�
 urllib3.disable_warnings()
 
 async def login_request(id, pw):
-    os_type = platform.system()
-    if os_type == "Linux":
-        browser = await launch(executablePath='/usr/bin/google-chrome-stable', headless=False, options={'args': ['--no-sandbox', '--headless']})
-    else:
-        browser = await launch(headless=False, options={'args': ['--headless']})
+    browser = await launch(headless=True)
     page = await browser.newPage()
     url = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
+    
     await page.goto(url)
 
     is_captcha = False
