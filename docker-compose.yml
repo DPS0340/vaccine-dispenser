@@ -14,3 +14,5 @@ services:
             - "com.centurylinklabs.watchtower.enable=true"
         environment:
             - VACCINEBOT_TOKEN=${VACCINEBOT_TOKEN}
+        ports:
+            - "8088:8088"
