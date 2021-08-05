@@ -6,6 +6,8 @@ aiohttp
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\main.py: 1
 discord.py
 
+requests
+
 # C:\Users\DPS0340\Programming\korea-covid-19-remaining-vaccine-macro\core.py: 12
 git+git://github.com/DPS0340/pyppeteer@dev
 
