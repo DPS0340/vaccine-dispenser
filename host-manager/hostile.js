@@ -5,6 +5,7 @@ import fs from 'https://deno.land/std/node/fs.ts'
 import process from 'https://deno.land/std/node/process.ts'
 import once from 'https://cdn.skypack.dev/once'
 import split from 'https://cdn.skypack.dev/split'
+import string_decoder from 'https://cdn.skypack.dev/string_decoder'
 import through from 'https://cdn.skypack.dev/through'
 
 var WINDOWS = process.platform === 'win32'
