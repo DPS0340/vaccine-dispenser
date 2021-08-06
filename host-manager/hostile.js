@@ -1,4 +1,5 @@
-  
+// Original code from https://github.com/feross/hostile
+// Ported to deno by DPS0340 https://github.com/DPS0340
 /*! hostile. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 import fs from 'https://deno.land/std/node/fs.ts'
 import process from 'https://deno.land/std/node/process.ts'
