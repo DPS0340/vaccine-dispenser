@@ -51,12 +51,10 @@ jobs:
       -
         name: Compile Apple Darwin
         run: deno compile --output host-manager-darwin-x86_64 --target x86_64-apple-darwin --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
-      -
-        name: tag commit hash
-        run: git tag $(git rev-parse --short "$GITHUB_SHA")
       - 
         name: Release to Github
         uses: softprops/action-gh-release@v1
+        tag_name: ${{ git rev-parse --short "$GITHUB_SHA" }}
         with:
           files: |
             host-manager-linux-x86_64
