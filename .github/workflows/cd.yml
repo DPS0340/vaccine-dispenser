@@ -55,7 +55,7 @@ jobs:
         name: Release to Github
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ git rev-parse --short "$GITHUB_SHA" }}
+          tag_name: ${{ github.sha }}
           files: |
             host-manager-linux-x86_64
             host-manager-windows-x86_64.exe
