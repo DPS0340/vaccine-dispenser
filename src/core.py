@@ -146,9 +146,9 @@ async def find_position(message, page: page_module.Page, address: str, zoom_leve
     return top_x, top_y, bottom_x, bottom_y
 
 async def login_proxy_request(bot, message):
-    url = '' # TODO
+    url = 'https://github.com/DPS0340/vaccine-dispenser/releases/'
     await message.channel.send("캡챠를 해제하기 위해, hosts 파일 변경이 필요합니다. 로컬 DNS와 프록시 서버를 통해 캡챠를 우회하고 있습니다.")
-    await message.channel.send(f"{url} node.js 실행 파일을 받고 관리자 권한으로 실행해주세요!")
+    await message.channel.send(f"{url} 에서 실행 파일을 받고 관리자 권한으로 실행해주세요!")
     await message.channel.send("실행하신 다음에는, 메시지로 IP를 입력해 주세요.")
 
     try:
