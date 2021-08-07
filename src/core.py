@@ -1,4 +1,5 @@
 import asyncio
+from typing import Callable, Tuple
 from log import logger as logging
 import aiohttp
 import json
@@ -6,9 +7,9 @@ import os
 import sys
 import unicodedata
 import urllib3
-import platform
-from pyppeteer import browser as browser_module, launch, page as page_module, network_manager
-from constants import Headers, cookies_map, webserver_port
+from pyppeteer import launch, page as page_module, network_manager
+from constants import Headers, cookies_map, make_queue, webserver_port, testing
+from mock import MockResponse, mock_check_user_info_loaded, mock_find_vaccine, mock_try_reservation
 from utils import async_wrapper
 
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
@@ -183,6 +184,7 @@ async def check_user_info_loaded(message, cookies):
     logging.info(user_info_json)
     if user_info_json.get('error'):
         await message.channel.send("사용자 정보를 불러오는데 실패하였습니다.")
+        await message.channel.send("개인정보 제공 동의를 하지 않으셨다면 카카오톡 -> 아래 중앙 버튼 클릭 -> 잔여백신 클릭 -> 아무 병원 클릭 -> 알림신청 후 동의를 눌러주세요.")
         await close(message)
         return False
     else:
@@ -255,11 +257,17 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-async def close(message, success=False):
-    if success is True:
-        await message.channel.send("잔여백신 예약 성공!! \n 카카오톡지갑을 확인하세요.")
+async def close(message, success=False, add_message = None):
+    sender = add_message if add_message else message.channel.send
+    success_message = "잔여백신 예약 성공!! \n 카카오톡지갑을 확인하세요."
+    error_message = "오류와 함께 잔여백신 예약이 종료되었습니다."
+
+    message = success_message if success else error_message
+
+    if add_message:
+        sender(message)
     else:
-        await message.channel.send("오류와 함께 잔여백신 예약이 종료되었습니다.")
+        await sender(message)
 
 
 def pretty_print(json_object):
@@ -270,72 +278,82 @@ def pretty_print(json_object):
             f"잔여갯수: {org.get('leftCounts')}\t상태: {org.get('status')}\t기관명: {org.get('orgName')}\t주소: {org.get('address')}")
 
 
-
-
-async def try_reservation(message, cookies, organization_code, vaccine_type, retry=False):
+async def try_reservation(message, cookies, organization_code, vaccine_type, mq: Tuple[Callable, Callable], lq: Tuple[Callable, Callable], retry=False):
     reservation_url = 'https://vaccine.kakao.com/api/v2/reservation'
     if retry:
         reservation_url = 'https://vaccine.kakao.com/api/v2/reservation/retry'
     data = {"from": "Map", "vaccineCode": vaccine_type,
             "orgCode": organization_code, "distance": None}
-    async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
-        response = await session.post(reservation_url, data=json.dumps(data), ssl=False)
-    response_json = json.loads(await response.read())
-    logging.info(response_json)
-    for key in response_json:
-        value = response_json[key]
-        if key != 'code':
-            continue
-        if key == 'code' and value == "NO_VACANCY":
-            await message.channel.send("잔여백신 접종 신청이 선착순 마감되었습니다.")
-            await asyncio.sleep(0.08)
-        elif key == 'code' and value == "TIMEOUT":
-            await message.channel.send("TIMEOUT, 예약을 재시도합니다.")
-            return await try_reservation(message, cookies, organization_code, vaccine_type, retry=True)
-        elif key == 'code' and value == "SUCCESS":
-            await message.channel.send("백신접종신청 성공!!!")
-            organization_code_success = response_json.get("organization")
-            await message.channel.send(
-                f"병원이름: {organization_code_success.get('orgName')}\t" +
-                f"전화번호: {organization_code_success.get('phoneNumber')}\t" +
-                f"주소: {organization_code_success.get('address')}")
-            await close(message, success=True)
-            return True
-        else:
-            await message.channel.send("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
-            await message.channel.send(await response.read())
-            await close(message)
-            return False
+
+    add_message, release_messages = mq
+    add_log, release_logs = lq
+
+    if testing:
+        response_text = await mock_try_reservation(reservation_url, data=json.dumps(data), ssl=False)
+        response_json = json.loads(response_text)
+    else:
+        async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
+            response = await session.post(reservation_url, data=json.dumps(data), ssl=False)
+        response_json = json.loads(await response.read())
+
+    add_log(response_json)
+    value = response_json.get('code', '')
+    if value == "NO_VACANCY":
+        add_message("잔여백신 접종 신청이 선착순 마감되었습니다.")
+        return False
+    elif value == "TIMEOUT":
+        add_message("TIMEOUT, 예약을 재시도합니다.")
+        return await try_reservation(message, cookies, organization_code, vaccine_type, mq, lq, retry=True)
+    elif value == "SUCCESS":
+        add_message("백신접종신청 성공!!!")
+        organization_code_success = response_json.get("organization")
+        add_message(
+            f"병원이름: {organization_code_success.get('orgName')}\n전화번호: {organization_code_success.get('phoneNumber')}\n주소: {organization_code_success.get('address')}")
+        await close(message, success=True, add_message=add_message)
+        return True
+    else:
+        add_message("ERROR. 아래 메시지를 보고, 예약이 신청된 병원 또는 1339에 예약이 되었는지 확인해보세요.")
+        add_message(await response.read())
+        await close(message, add_message=add_message)
+        return False
 
 # ===================================== def ===================================== #
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left):
+async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left, mq: Tuple[Callable, Callable], lq: Tuple[Callable, Callable]):
     url = 'https://vaccine-map.kakao.com/api/v3/vaccine/left_count_by_coords'
-    data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "onlyLeft": only_left, "order": "latitude",
-            "topLeft": {"x": top_x, "y": top_y}}
-    done = False
-    found = None
+    data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "topLeft": {"x": top_x, "y": top_y}, "onlyLeft": only_left, "order": "count"}
 
+    done = False
+    founds = []
+
+    add_message, release_messages = mq
+    add_log, release_logs = lq
+    
     await message.channel.send(f"백신을 {search_time}초 주기로 찾는 중입니다..")
 
     while not done:
         try:
             await asyncio.sleep(search_time)
-            async with aiohttp.ClientSession(headers=Headers.headers_map) as session:
-                response = await session.post(url, data=json.dumps(
-                    data), ssl=False, timeout=5)
-                logging.info(response.status)
-
+            if testing:
+                response = MockResponse()
+            else:
+                async with aiohttp.ClientSession(headers=Headers.headers_map) as session:
+                    response = await session.post(url, data=json.dumps(
+                        data), ssl=False, timeout=5)
             text = await response.read()
             json_data = json.loads(text)
-            logging.info(json_data)
 
-            for x in json_data.get("organizations"):
-                if x.get('status') == "AVAILABLE" or x.get('leftCounts') != 0:
-                    found = x
-                    done = True
-                    break
+            organizations = json_data.get("organizations", [])
+
+            if organizations != [] or response.status != 200:
+                logging.info(response.status)
+                logging.info(json_data)
+
+            founds = [x for x in organizations if x.get('status') == "AVAILABLE" or x.get('leftCounts') != 0]
+            if founds:
+                done = True
+                break
         except asyncio.exceptions.TimeoutError as err:
             logging.info(f"timeout err: {err}", exc_info=True)
             continue
@@ -344,41 +362,48 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             await message.channel.send("오류 발생!")
             await message.channel.send(err)
             await close(message)
+        
+    async def prepare_reservation(found):
+        if found is None:
+            return False
+        add_message(f"{found.get('orgName')} 에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
+        add_message(f"주소는 : {found.get('address')} 입니다.")
+        organization_code = found.get('orgCode')
 
-    if found is None:
-        return False
-    await message.channel.send(f"{found.get('orgName')} 에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
-    await message.channel.send(f"주소는 : {found.get('address')} 입니다.")
-    organization_code = found.get('orgCode')
+        # 실제 백신 남은수량 확인
+        vaccine_found_code = None
 
-    # 실제 백신 남은수량 확인
-    vaccine_found_code = None
+        if vaccine_type != "ANY":
+            vaccine_found_code = vaccine_type
+            add_message(f"{vaccine_found_code} 으로 예약을 시도합니다.")
+        else:  # ANY 백신 선택
+            check_organization_url = f'https://vaccine.kakao.com/api/v3/org/org_code/{organization_code}'
+            async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
+                check_organization_response = await session.get(check_organization_url, data=json.dumps(
+                        data), headers=Headers.headers_vacc, ssl=False, timeout=5)
+            text = await check_organization_response.read()
+            check_organization_data = json.loads(text).get("lefts")
+            for x in check_organization_data:
+                if x.get('leftCount', 0) != 0:
+                    found = x
+                    add_message(f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
+                    vaccine_found_code = x.get('vaccineCode')
+                    break
+                else:
+                    add_message(f"{x.get('vaccineName')} 백신이 없습니다.")
 
-    if vaccine_type == "ANY":  # ANY 백신 선택
-        check_organization_url = f'https://vaccine.kakao.com/api/v3/org/org_code/{organization_code}'
-        async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
-            check_organization_response = await session.get(check_organization_url, data=json.dumps(
-                    data), headers=Headers.headers_vacc, ssl=False, timeout=5)
-        text = await check_organization_response.read()
-        check_organization_data = json.loads(text).get("lefts")
-        for x in check_organization_data:
-            if x.get('leftCount') != 0:
-                found = x
-                await message.channel.send(f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
-                vaccine_found_code = x.get('vaccineCode')
-                break
-            else:
-                await message.channel.send(f"{x.get('vaccineName')} 백신이 없습니다.")
-
-    else:
-        vaccine_found_code = vaccine_type
-        await message.channel.send(f"{vaccine_found_code} 으로 예약을 시도합니다.")
-
-    if vaccine_found_code:
-        result = await try_reservation(message, cookies, organization_code, vaccine_found_code)
-        return result
-    else:
-        return False
+        if vaccine_found_code:
+            result = await try_reservation(message, cookies, organization_code, vaccine_found_code, mq, lq)
+            return result
+        else:
+            return False
+    
+    queue = [prepare_reservation(found) for found in founds]
+    results = await asyncio.gather(*queue)
+    await asyncio.gather(release_messages(), release_logs())
+    succeed_result = [result for result in results if result == True]
+    is_success = len(succeed_result) > 0
+    return is_success
 
 async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
     cookies, browser, page = await login_request(id, pw)
@@ -397,10 +422,15 @@ async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
 
     if None in [top_x, top_y, bottom_x, bottom_y]:
         return
-
-    user_available = await check_user_info_loaded(message, cookies)
+    
+    if testing:
+        user_available = await mock_check_user_info_loaded(message, cookies)
+    else:
+        user_available = await check_user_info_loaded(message, cookies)
     if not user_available:
         return
     find_result = False
+    mq = make_queue(message.channel.send)
+    lq = make_queue(logging.info)
     while not find_result:
-        find_result = await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left)
+        find_result = await find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left, mq, lq)
