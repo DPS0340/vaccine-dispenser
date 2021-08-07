@@ -31,7 +31,8 @@
 
 - [X] 디스코드 봇 미그레이션
 - [X] aiohttp를 사용한 비동기 처리
-- [X] 캡챠 발생시 hosts를 이용하여 cookie hijacking
+- [X] pyppeteer를 사용한 로그인 자동화
+- [X] 로그인중 캡챠 발생시 hosts를 이용하여 cookie hijacking
 - [X] 주소 기반 좌표 체크 자동화
 - [X] 예약시 동시에 여러 병원 요청
 - [X] 로깅, 메시지 예약시 lazy하게 작동
