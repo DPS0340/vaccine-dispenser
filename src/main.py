@@ -67,7 +67,7 @@ async def help(message):
     embed.add_field(
         name=f"License", value="MIT License, Forked from https://github.com/SJang1/korea-covid-19-remaining-vaccine-macro", inline=False)
     embed.add_field(
-        name=f"Github", value="https://github.com/DPS0340/korea-covid-19-remaining-vaccine-macro", inline=False)
+        name=f"Github", value="https://github.com/DPS0340/vaccine-dispenser", inline=False)
     await message.channel.send(embed=embed)
 
 @bot.event
