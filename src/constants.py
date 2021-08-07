@@ -10,7 +10,6 @@ vaccine_candidates = [
         {"name": "(미사용)", "code": "VEN00020"},
     ]
 
-
 class Headers:
     headers_map = {
         "Accept": "application/json, text/plain, */*",
@@ -41,9 +40,30 @@ class Headers:
 cookies_map = {}
 temp_cookies_map = {}
 
+import inspect
+from typing import Callable, Tuple
+
+def make_queue(send_func: Callable) -> Tuple[Callable, Callable]:
+    queue = []
+    def add_message(text: str):
+        nonlocal queue
+        queue.append(text)
+    async def release_messages():
+        nonlocal queue
+        is_coroutine = inspect.iscoroutinefunction(send_func)
+        while queue:
+            text = queue.pop(0)
+            if is_coroutine:
+                await send_func(text)
+            else:
+                send_func(text)
+    return (add_message, release_messages)
+
 def get_ip_address():
     import requests
     return requests.get('https://checkip.amazonaws.com').text.strip()
 
 ip_address = get_ip_address()
 webserver_port = 8088
+
+testing = False
