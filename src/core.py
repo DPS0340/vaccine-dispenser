@@ -15,6 +15,7 @@ from utils import async_wrapper
 search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
+
 async def login_request(id, pw):
     browser = await launch(headless=True, options={'args': ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']})
     page = await browser.newPage()
@@ -44,7 +45,7 @@ async def login_request(id, pw):
     await login_button.click()
     await asyncio.sleep(2)
     await page.waitForSelector('body')
-    
+
     is_captcha = False
 
     captcha_selector = '.wrap_captcha'
@@ -55,7 +56,7 @@ async def login_request(id, pw):
             is_captcha = True
     except:
         is_captcha = True
-    
+
     if is_captcha:
         return None, None, None
 
@@ -70,9 +71,10 @@ async def login_request(id, pw):
     except Exception as err:
         logging.info("not found lookup button")
         pass
-    
+
     cookies = await page.cookies()
     return cookies, browser, page
+
 
 async def find_position(message, page: page_module.Page, address: str, zoom_level: int):
     finder_selector = '.btn_util.btn_search'
@@ -118,7 +120,7 @@ async def find_position(message, page: page_module.Page, address: str, zoom_leve
     def wait_for_request():
         while find_count < zoom_level:
             continue
-        
+
     async def intercept_network_request(request: network_manager.Request):
         await request.continue_()
         if 'left_count_by_coords' not in request.url:
@@ -137,7 +139,8 @@ async def find_position(message, page: page_module.Page, address: str, zoom_leve
             await page.mouse.wheel({'deltaY': deltaY})
 
     await page.setRequestInterception(True)
-    page.on('request', lambda request: asyncio.ensure_future(intercept_network_request(request)))
+    page.on('request', lambda request: asyncio.ensure_future(
+        intercept_network_request(request)))
 
     await map.click({'button': 'middle'})
     await page.mouse.wheel({'deltaY': deltaY})
@@ -145,6 +148,7 @@ async def find_position(message, page: page_module.Page, address: str, zoom_leve
     await async_wrapper(wait_for_request)
 
     return top_x, top_y, bottom_x, bottom_y
+
 
 async def login_proxy_request(bot, message):
     url = 'https://github.com/DPS0340/vaccine-dispenser/releases/'
@@ -175,6 +179,7 @@ async def login_proxy_request(bot, message):
     await message.channel.send("로그인 완료!")
 
     return cookies
+
 
 async def check_user_info_loaded(message, cookies):
     user_info_api = 'https://vaccine.kakao.com/api/v1/user'
@@ -243,6 +248,7 @@ def is_in_range(coord_type, coord, user_min_x=-180.0, user_max_y=90.0):
         # float 이외 값 입력 방지
         return False
 
+
 def clear():
     if 'win' in sys.platform.lower():
         os.system('cls')
@@ -257,7 +263,7 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-async def close(message, success=False, add_message = None):
+async def close(message, success=False, add_message=None):
     sender = add_message if add_message else message.channel.send
     success_message = "잔여백신 예약 성공!! \n 카카오톡지갑을 확인하세요."
     error_message = "오류와 함께 잔여백신 예약이 종료되었습니다."
@@ -282,7 +288,7 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, mq:
     reservation_url = 'https://vaccine.kakao.com/api/v2/reservation'
     if retry:
         reservation_url = 'https://vaccine.kakao.com/api/v2/reservation/retry'
-    data = {"from": "Map", "vaccineCode": vaccine_type,
+    data = {"from": "List", "vaccineCode": vaccine_type,
             "orgCode": organization_code, "distance": None}
 
     add_message, release_messages = mq
@@ -320,16 +326,19 @@ async def try_reservation(message, cookies, organization_code, vaccine_type, mq:
 # ===================================== def ===================================== #
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+
+
 async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, bottom_y, only_left, mq: Tuple[Callable, Callable], lq: Tuple[Callable, Callable]):
     url = 'https://vaccine-map.kakao.com/api/v3/vaccine/left_count_by_coords'
-    data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "topLeft": {"x": top_x, "y": top_y}, "onlyLeft": only_left, "order": "count"}
+    data = {"bottomRight": {"x": bottom_x, "y": bottom_y}, "topLeft": {
+        "x": top_x, "y": top_y}, "onlyLeft": only_left, "order": "count"}
 
     done = False
     founds = []
 
     add_message, release_messages = mq
     add_log, release_logs = lq
-    
+
     await message.channel.send(f"백신을 {search_time}초 주기로 찾는 중입니다..")
 
     while not done:
@@ -350,7 +359,8 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                 logging.info(response.status)
                 logging.info(json_data)
 
-            founds = [x for x in organizations if x.get('status') == "AVAILABLE" or x.get('leftCounts') != 0]
+            founds = [x for x in organizations if x.get(
+                'status') == "AVAILABLE" or x.get('leftCounts') != 0]
             if founds:
                 done = True
                 break
@@ -362,11 +372,12 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             await message.channel.send("오류 발생!")
             await message.channel.send(err)
             await close(message)
-        
+
     async def prepare_reservation(found):
         if found is None:
             return False
-        add_message(f"{found.get('orgName')} 에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
+        add_message(
+            f"{found.get('orgName')} 에서 백신을 {found.get('leftCounts')}개 발견했습니다.")
         add_message(f"주소는 : {found.get('address')} 입니다.")
         organization_code = found.get('orgCode')
 
@@ -380,13 +391,14 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             check_organization_url = f'https://vaccine.kakao.com/api/v3/org/org_code/{organization_code}'
             async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
                 check_organization_response = await session.get(check_organization_url, data=json.dumps(
-                        data), headers=Headers.headers_vacc, ssl=False, timeout=5)
+                    data), headers=Headers.headers_vacc, ssl=False, timeout=5)
             text = await check_organization_response.read()
             check_organization_data = json.loads(text).get("lefts")
             for x in check_organization_data:
                 if x.get('leftCount', 0) != 0:
                     found = x
-                    add_message(f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
+                    add_message(
+                        f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
                     vaccine_found_code = x.get('vaccineCode')
                     break
                 else:
@@ -397,13 +409,14 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             return result
         else:
             return False
-    
+
     queue = [prepare_reservation(found) for found in founds]
     results = await asyncio.gather(*queue)
     await asyncio.gather(release_messages(), release_logs())
     succeed_result = [result for result in results if result == True]
     is_success = len(succeed_result) > 0
     return is_success
+
 
 async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
     cookies, browser, page = await login_request(id, pw)
@@ -422,7 +435,7 @@ async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
 
     if None in [top_x, top_y, bottom_x, bottom_y]:
         return
-    
+
     if testing:
         user_available = await mock_check_user_info_loaded(message, cookies)
     else:
