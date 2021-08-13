@@ -359,8 +359,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                 logging.info(response.status)
                 logging.info(json_data)
 
-            founds = [x for x in organizations if x.get(
-                'status') == "AVAILABLE" or x.get('leftCounts') != 0]
+            founds = [x for x in organizations if x.get('vaccineCode') == vaccine_type and x.get('leftCounts') != 0]
             if founds:
                 done = True
                 break
