@@ -359,7 +359,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                 logging.info(response.status)
                 logging.info(json_data)
 
-            founds = [x for x in organizations if x.get('vaccineCode') == vaccine_type and x.get('leftCounts') != 0]
+            founds = [x for x in organizations if x.get('leftCounts') != 0]
             if founds:
                 done = True
                 break
@@ -394,7 +394,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
             text = await check_organization_response.read()
             check_organization_data = json.loads(text).get("lefts")
             for x in check_organization_data:
-                if x.get('leftCount', 0) != 0:
+                if x.get('leftCount', 0) != 0 and x.get('vaccineCode') == vaccine_type:
                     found = x
                     add_message(
                         f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
