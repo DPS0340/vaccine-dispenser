@@ -392,6 +392,7 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
                 check_organization_response = await session.get(check_organization_url, data=json.dumps(
                     data), headers=Headers.headers_vacc, ssl=False, timeout=5)
             text = await check_organization_response.read()
+            logging.info(text)
             check_organization_data = json.loads(text).get("lefts")
             for x in check_organization_data:
                 if x.get('leftCount', 0) != 0 and x.get('vaccineCode') == vaccine_type:
