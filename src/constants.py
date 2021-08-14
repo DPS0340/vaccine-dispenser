@@ -73,3 +73,4 @@ ip_address = get_ip_address()
 webserver_port = 8088
 
 testing = False
+search_time = 0.15  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초

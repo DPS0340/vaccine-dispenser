@@ -11,8 +11,8 @@ from pyppeteer import launch, page as page_module, network_manager
 from constants import Headers, cookies_map, make_queue, webserver_port, testing
 from mock import MockResponse, mock_check_user_info_loaded, mock_find_vaccine, mock_try_reservation
 from utils import async_wrapper
+from constants import search_time
 
-search_time = 0.2  # 잔여백신을 해당 시간마다 한번씩 검색합니다. 단위: 초
 urllib3.disable_warnings()
 
 
@@ -383,26 +383,22 @@ async def find_vaccine(message, cookies, vaccine_type, top_x, top_y, bottom_x, b
         # 실제 백신 남은수량 확인
         vaccine_found_code = None
 
-        if vaccine_type != "ANY":
-            vaccine_found_code = vaccine_type
-            add_message(f"{vaccine_found_code} 으로 예약을 시도합니다.")
-        else:  # ANY 백신 선택
-            check_organization_url = f'https://vaccine.kakao.com/api/v3/org/org_code/{organization_code}'
-            async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
-                check_organization_response = await session.get(check_organization_url, data=json.dumps(
-                    data), headers=Headers.headers_vacc, ssl=False, timeout=5)
-            text = await check_organization_response.read()
-            logging.info(text)
-            check_organization_data = json.loads(text).get("lefts")
-            for x in check_organization_data:
-                if x.get('leftCount', 0) != 0 and x.get('vaccineCode') == vaccine_type:
-                    found = x
-                    add_message(
-                        f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
-                    vaccine_found_code = x.get('vaccineCode')
-                    break
-                else:
-                    add_message(f"{x.get('vaccineName')} 백신이 없습니다.")
+        check_organization_url = f'https://vaccine.kakao.com/api/v3/org/org_code/{organization_code}'
+        async with aiohttp.ClientSession(headers=Headers.headers_vacc, cookies=cookies) as session:
+            check_organization_response = await session.get(check_organization_url, data=json.dumps(
+                data), headers=Headers.headers_vacc, ssl=False, timeout=5)
+        text = await check_organization_response.read()
+        logging.info(text)
+        check_organization_data = json.loads(text).get("lefts")
+        for x in check_organization_data:
+            if x.get('leftCount', 0) != 0 and x.get('vaccineCode') == vaccine_type:
+                found = x
+                add_message(
+                    f"{x.get('vaccineName')} 백신을 {x.get('leftCount')}개 발견했습니다.")
+                vaccine_found_code = x.get('vaccineCode')
+                break
+            else:
+                add_message(f"{x.get('vaccineName')} 백신이 없습니다.")
 
         if vaccine_found_code:
             result = await try_reservation(message, cookies, organization_code, vaccine_found_code, mq, lq)
