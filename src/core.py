@@ -7,6 +7,7 @@ import os
 import sys
 import unicodedata
 import urllib3
+import time
 from pyppeteer import launch, page as page_module, network_manager
 from constants import Headers, cookies_map, make_queue, webserver_port, testing
 from mock import MockResponse, mock_check_user_info_loaded, mock_find_vaccine, mock_try_reservation
@@ -165,16 +166,27 @@ async def login_proxy_request(bot, message):
         return
 
     url = f'http://vaccinebot.kakao.com:{webserver_port}/login?continue=https%3A%2F%2Fvaccine-map.kakao.com%2Fmap2%3Fv%3D1'
-    await message.channel.send(f"{url} 로 로그인하시면 백신봇 로그인이 완료됩니다! **꼭 로그인 유지를 체크해주세요.**")
+    timeout = 180.0
+
+    await message.channel.send(f"{url} 로 로그인하시면 백신봇 로그인이 완료됩니다! **꼭 로그인 유지를 체크해주세요.**\n{int(timeout)}초 후에 세션이 자동으로 종료됩니다.")
+
+    started_time = time.time()
 
     def wait_for_cookies():
         while cookies_map.get(ip) is None:
+            current_time = time.time()
+            if current_time - started_time >= timeout:
+                return None
             continue
         cookies = cookies_map[ip]
         del cookies_map[ip]
         return cookies
 
     cookies = await async_wrapper(wait_for_cookies)
+
+    if not cookies:
+        await message.channel.send("타임아웃 시간이 지났습니다. 다시 예약 커맨드를 입력해주세요.")
+        return None
 
     await message.channel.send("로그인 완료!")
 
@@ -420,6 +432,8 @@ async def reservation(bot, message, vaccine_type, id, pw, **kwargs):
         cookies = {x['name']: x['value'] for x in cookies}
     else:
         cookies = await login_proxy_request(bot, message)
+        if not cookies:
+            return
     if kwargs.get('address') is not None:
         address, zoom_level, only_left = kwargs.values()
         top_x, top_y, bottom_x, bottom_y = await find_position(message, page, address, zoom_level)
